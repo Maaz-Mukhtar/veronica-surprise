@@ -1,0 +1,11 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g3" x1="0" y1="900" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF5D95"/>
+      <stop offset="1" stop-color="#FFD4E3"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#g3)"/>
+  <path d="M239 477c0-81 66-147 147-147 84 0 146 74 214 139 68-65 130-139 214-139 81 0 147 66 147 147 0 163-169 228-361 353-192-125-361-190-361-353Z" fill="#FFFFFF" fill-opacity="0.28"/>
+  <text x="600" y="462" text-anchor="middle" font-size="72" fill="#FFFFFF" font-family="Verdana">Photo Placeholder 03</text>
+</svg>

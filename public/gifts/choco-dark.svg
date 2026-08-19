@@ -1,0 +1,14 @@
+<svg width="900" height="1125" viewBox="0 0 900 1125" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="1125" fill="#ECE5E3"/>
+  <rect x="170" y="230" width="560" height="520" rx="34" fill="#4A2C23"/>
+  <rect x="210" y="280" width="480" height="420" rx="24" fill="#6A4338"/>
+  <g fill="#2F1913">
+    <rect x="250" y="320" width="130" height="110" rx="12"/>
+    <rect x="400" y="320" width="130" height="110" rx="12"/>
+    <rect x="550" y="320" width="100" height="110" rx="12"/>
+    <rect x="250" y="450" width="130" height="110" rx="12"/>
+    <rect x="400" y="450" width="130" height="110" rx="12"/>
+    <rect x="550" y="450" width="100" height="110" rx="12"/>
+  </g>
+  <text x="450" y="875" text-anchor="middle" font-size="56" fill="#3B241D" font-family="Verdana">Dark Chocolate 🍫</text>
+</svg>

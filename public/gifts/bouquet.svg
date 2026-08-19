@@ -1,0 +1,26 @@
+<svg width="900" height="1125" viewBox="0 0 900 1125" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="900" y2="1125" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE6F0"/>
+      <stop offset="1" stop-color="#FFF5D9"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="1125" fill="url(#bg)"/>
+  <g opacity="0.95">
+    <circle cx="320" cy="310" r="95" fill="#FF6FA1"/>
+    <circle cx="460" cy="250" r="98" fill="#FF8BB2"/>
+    <circle cx="590" cy="325" r="92" fill="#FF7FA8"/>
+    <circle cx="410" cy="410" r="88" fill="#FF96BC"/>
+    <circle cx="535" cy="425" r="86" fill="#FF7FA8"/>
+    <circle cx="290" cy="430" r="78" fill="#FFA3C4"/>
+  </g>
+  <g opacity="0.9">
+    <path d="M450 470L360 870" stroke="#4E8F55" stroke-width="18" stroke-linecap="round"/>
+    <path d="M450 470L500 865" stroke="#5AA162" stroke-width="18" stroke-linecap="round"/>
+    <path d="M450 470L420 875" stroke="#4E8F55" stroke-width="18" stroke-linecap="round"/>
+  </g>
+  <path d="M240 760L450 995L655 760" fill="#F5D59D"/>
+  <path d="M255 760L450 965L640 760" fill="#EEC687"/>
+  <path d="M360 935H540" stroke="#D18A45" stroke-width="12" stroke-linecap="round"/>
+  <text x="450" y="1065" text-anchor="middle" font-size="56" fill="#8E2B53" font-family="Verdana">For You 💐</text>
+</svg>

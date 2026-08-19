@@ -1,0 +1,24 @@
+<svg width="900" height="1125" viewBox="0 0 900 1125" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="900" y2="1125" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF8D9"/>
+      <stop offset="1" stop-color="#FFE9B8"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="1125" fill="url(#bg)"/>
+  <g>
+    <circle cx="300" cy="300" r="115" fill="#FFCC33"/>
+    <circle cx="300" cy="300" r="56" fill="#7C4A20"/>
+    <circle cx="470" cy="240" r="120" fill="#FFCC33"/>
+    <circle cx="470" cy="240" r="58" fill="#7C4A20"/>
+    <circle cx="620" cy="320" r="108" fill="#FFCC33"/>
+    <circle cx="620" cy="320" r="53" fill="#7C4A20"/>
+    <circle cx="430" cy="410" r="112" fill="#FFCC33"/>
+    <circle cx="430" cy="410" r="56" fill="#7C4A20"/>
+  </g>
+  <path d="M450 470L380 880" stroke="#4A8B4F" stroke-width="18" stroke-linecap="round"/>
+  <path d="M450 470L510 875" stroke="#5AA162" stroke-width="18" stroke-linecap="round"/>
+  <path d="M250 760L450 990L655 760" fill="#EBD1A0"/>
+  <path d="M265 760L450 962L640 760" fill="#E4C287"/>
+  <text x="450" y="1065" text-anchor="middle" font-size="56" fill="#8C4A1A" font-family="Verdana">Sunflowers for You 🌻</text>
+</svg>
