@@ -3,7 +3,15 @@
 import confetti from "canvas-confetti";
 import { motion, type PanInfo } from "framer-motion";
 import Image from "next/image";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  type FormEvent,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { GiftCard } from "@/content";
 import { content, formatDisplayDate } from "@/content";
 import type { RecipientProfile } from "@/lib/recipients";
@@ -22,7 +30,10 @@ export default function VeronicaExperience({
   recipient = null,
   allowQueryOverrides = true,
 }: VeronicaExperienceProps) {
-  const [hasStarted] = useState(true);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
+  const hasStarted = isUnlocked;
   const [isMuted, setIsMuted] = useState(false);
   const [answer, setAnswer] = useState<Answer>(null);
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -175,6 +186,20 @@ export default function VeronicaExperience({
     void playTone(980, 1360, 160, 0.11, "sine", 120);
     void playTone(260, 540, 420, 0.1, "sawtooth", 170);
   }, [playTone]);
+
+  const unlockExperience = useCallback((event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (passwordInput.trim() === content.access.password) {
+      window.sessionStorage.setItem("veronica-site-unlocked", "true");
+      setPasswordError(false);
+      setPasswordInput("");
+      setIsUnlocked(true);
+      return;
+    }
+
+    setPasswordError(true);
+  }, [passwordInput]);
 
   const placeNoNearDefault = useCallback(() => {
     const arena = arenaRef.current;
@@ -337,6 +362,12 @@ export default function VeronicaExperience({
   );
 
   useEffect(() => {
+    if (window.sessionStorage.getItem("veronica-site-unlocked") === "true") {
+      setIsUnlocked(true);
+    }
+  }, []);
+
+  useEffect(() => {
     if (!allowQueryOverrides || recipient) {
       setNames({
         to: recipient?.to ?? content.names.to,
@@ -405,6 +436,65 @@ export default function VeronicaExperience({
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [answer, hasStarted, placeNoNearDefault]);
+
+  if (!isUnlocked) {
+    return (
+      <main className="access-gate">
+        <div className="pastel-sky" aria-hidden="true">
+          <span className="pastel-orb orb-one" />
+          <span className="pastel-orb orb-two" />
+          <span className="pastel-orb orb-three" />
+          <span className="floating-doodle access-doodle-one">✿</span>
+          <span className="floating-doodle access-doodle-two">✦</span>
+          <span className="floating-doodle access-doodle-three">♡</span>
+        </div>
+        <motion.section
+          className={`access-card ${passwordError ? "access-card-error" : ""}`}
+          initial={{ opacity: 0, y: 18, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          aria-labelledby="access-title"
+        >
+          <div className="access-lock" aria-hidden="true">
+            <span>✿</span>
+          </div>
+          <p className="eyebrow">{content.access.eyebrow}</p>
+          <h1 id="access-title">{content.access.title}</h1>
+          <p className="access-message">{content.access.message}</p>
+          <p className="access-prompt">{content.access.prompt}</p>
+
+          <form className="access-form" onSubmit={unlockExperience}>
+            <label htmlFor="secret-word">Secret word</label>
+            <input
+              id="secret-word"
+              type="password"
+              value={passwordInput}
+              onChange={(event) => {
+                setPasswordInput(event.target.value);
+                if (passwordError) setPasswordError(false);
+              }}
+              placeholder={content.access.placeholder}
+              autoComplete="current-password"
+              autoFocus
+              aria-invalid={passwordError}
+              aria-describedby={passwordError ? "access-error" : undefined}
+            />
+            <button type="submit">{content.access.buttonText}</button>
+          </form>
+
+          <p
+            id="access-error"
+            className="access-error"
+            role="alert"
+            aria-live="polite"
+          >
+            {passwordError ? content.access.errorText : "\u00a0"}
+          </p>
+          <p className="access-footer">Made especially for you by Mahal</p>
+        </motion.section>
+      </main>
+    );
+  }
 
   return (
     <div className={`page-shell ${themeClass}`}>

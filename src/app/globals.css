@@ -48,6 +48,236 @@ button:focus-visible {
   outline-offset: 3px;
 }
 
+.access-gate {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: clamp(1.25rem, 5vw, 3rem);
+  background:
+    radial-gradient(circle at 14% 18%, rgba(248, 205, 220, 0.72) 0, transparent 30%),
+    radial-gradient(circle at 86% 15%, rgba(210, 205, 244, 0.76) 0, transparent 30%),
+    radial-gradient(circle at 50% 92%, rgba(202, 233, 220, 0.74) 0, transparent 31%),
+    linear-gradient(145deg, #fffaf5 0%, #faf6ff 52%, #f3fbff 100%);
+  display: grid;
+  place-items: center;
+}
+
+.access-card {
+  position: relative;
+  width: min(500px, 100%);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.94);
+  border-radius: clamp(27px, 5vw, 38px);
+  padding: clamp(2rem, 7vw, 3.35rem);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 28px 80px rgba(93, 68, 122, 0.17), inset 0 0 0 1px rgba(104, 80, 133, 0.08);
+  backdrop-filter: blur(22px);
+  text-align: center;
+}
+
+.access-card::before,
+.access-card::after {
+  position: absolute;
+  color: rgba(125, 91, 156, 0.11);
+  font-family: var(--font-dancing-script), cursive;
+  line-height: 1;
+}
+
+.access-card::before {
+  content: "✿";
+  left: -1.1rem;
+  bottom: -1.8rem;
+  font-size: 8rem;
+  transform: rotate(-15deg);
+}
+
+.access-card::after {
+  content: "♡";
+  right: 1.2rem;
+  top: 1rem;
+  font-size: 3.4rem;
+  transform: rotate(9deg);
+}
+
+.access-lock {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  margin: 1rem auto 1.35rem;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #f4bfd2, #d7c7f2);
+  color: #76578e;
+  box-shadow: 0 12px 27px rgba(111, 79, 142, 0.2), inset 0 0 0 5px rgba(255, 255, 255, 0.38);
+  display: grid;
+  place-items: center;
+}
+
+.access-lock::before {
+  content: "";
+  position: absolute;
+  top: -22px;
+  width: 39px;
+  height: 34px;
+  border: 6px solid #b28bc8;
+  border-bottom: 0;
+  border-radius: 24px 24px 0 0;
+}
+
+.access-lock span {
+  position: relative;
+  z-index: 1;
+  font-size: 2.2rem;
+}
+
+.access-card .eyebrow {
+  position: relative;
+  z-index: 1;
+  margin-inline: auto;
+}
+
+.access-card h1 {
+  position: relative;
+  z-index: 1;
+  margin: 0.9rem 0 0;
+  color: #675079;
+  font-family: var(--font-dancing-script), "Brush Script MT", cursive;
+  font-size: clamp(2.65rem, 9vw, 4.1rem);
+  line-height: 1.02;
+}
+
+.access-message,
+.access-prompt,
+.access-footer,
+.access-error {
+  position: relative;
+  z-index: 1;
+}
+
+.access-message {
+  max-width: 350px;
+  margin: 0.85rem auto 0;
+  color: #776b80;
+  line-height: 1.65;
+}
+
+.access-prompt {
+  margin: 1.2rem 0 0;
+  color: #7c648d;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.access-form {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.65rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.access-form label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.access-form input {
+  width: 100%;
+  border: 1px solid rgba(112, 82, 145, 0.19);
+  border-radius: 999px;
+  padding: 0.9rem 1.15rem;
+  background: rgba(255, 255, 255, 0.92);
+  color: #574664;
+  font-size: 1rem;
+  text-align: center;
+  letter-spacing: 0.08em;
+  box-shadow: inset 0 2px 7px rgba(96, 70, 124, 0.06), 0 8px 20px rgba(96, 70, 124, 0.06);
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.access-form input::placeholder {
+  color: #a99cb1;
+  letter-spacing: 0;
+}
+
+.access-form input:focus {
+  border-color: rgba(120, 87, 154, 0.48);
+  box-shadow: 0 0 0 4px rgba(216, 200, 243, 0.38), 0 9px 22px rgba(96, 70, 124, 0.08);
+}
+
+.access-form input[aria-invalid="true"] {
+  border-color: rgba(184, 91, 126, 0.5);
+  box-shadow: 0 0 0 4px rgba(245, 191, 209, 0.3);
+}
+
+.access-form button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.9rem 1.15rem;
+  background: linear-gradient(135deg, #b98fd3, #8e69ac);
+  color: #fff;
+  font-weight: 850;
+  box-shadow: 0 12px 25px rgba(111, 79, 142, 0.28);
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.access-form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 29px rgba(111, 79, 142, 0.33);
+}
+
+.access-error {
+  min-height: 1.3rem;
+  margin: 0.7rem 0 0;
+  color: #a44e73;
+  font-size: 0.79rem;
+  font-weight: 750;
+}
+
+.access-footer {
+  margin: 0.7rem 0 0;
+  color: #9a8ba3;
+  font-family: var(--font-dancing-script), cursive;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.access-card-error {
+  animation: access-shake 280ms ease-in-out;
+}
+
+.access-doodle-one {
+  top: 12%;
+  left: 10%;
+  font-size: 2.7rem;
+}
+
+.access-doodle-two {
+  top: 18%;
+  right: 11%;
+  font-size: 2rem;
+  animation-delay: -2.5s;
+}
+
+.access-doodle-three {
+  right: 8%;
+  bottom: 12%;
+  font-size: 3.1rem;
+  animation-delay: -4s;
+}
+
+@keyframes access-shake {
+  0%, 100% { transform: translateX(0); }
+  30% { transform: translateX(-7px); }
+  65% { transform: translateX(7px); }
+}
+
 .page-shell {
   position: relative;
   isolation: isolate;

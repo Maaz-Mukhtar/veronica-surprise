@@ -2,6 +2,8 @@
 
 A dreamy, pastel, just-because surprise made for Veronica by Mahal.
 
+The site opens with a lightweight password gate. Change its password and landing-page copy in `src/content.ts` under `content.access`.
+
 ## Run locally
 
 ```bash
