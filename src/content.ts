@@ -34,12 +34,13 @@ export const content = {
   access: {
     password: "kneel",
     eyebrow: "A private little corner",
-    title: "For Veronica, with love ✿",
+    title: "For {to}, with love ✿",
     message: "A tiny surprise is waiting on the other side.",
     prompt: "Say the secret word to step inside.",
     placeholder: "Secret word",
     buttonText: "Open my surprise ✦",
     errorText: "That is not our secret word—try again ✿",
+    footer: "Made especially for you by {from}",
   },
   names: {
     to: "My Princess",

@@ -459,7 +459,7 @@ export default function VeronicaExperience({
             <span>✿</span>
           </div>
           <p className="eyebrow">{content.access.eyebrow}</p>
-          <h1 id="access-title">{content.access.title}</h1>
+          <h1 id="access-title">{resolveText(content.access.title)}</h1>
           <p className="access-message">{content.access.message}</p>
           <p className="access-prompt">{content.access.prompt}</p>
 
@@ -490,7 +490,7 @@ export default function VeronicaExperience({
           >
             {passwordError ? content.access.errorText : "\u00a0"}
           </p>
-          <p className="access-footer">Made especially for you by Mahal</p>
+          <p className="access-footer">{resolveText(content.access.footer)}</p>
         </motion.section>
       </main>
     );
