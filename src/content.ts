@@ -32,7 +32,7 @@ export type TimelineItem = {
 
 export const content = {
   access: {
-    password: "kneel",
+    password: "haircut",
     eyebrow: "A private little corner",
     title: "For {to}, with love ✿",
     message: "A tiny surprise is waiting on the other side.",
