@@ -1,0 +1,347 @@
+/* Design variant: Dreamy scrapbook */
+
+:root {
+  --ink: #4c3d4f;
+  --muted-ink: #786978;
+  --plum: #9d698d;
+  --plum-deep: #6e4b69;
+  --paper: #fffdf7;
+  --paper-solid: #fffdf7;
+  --line: rgba(100, 72, 96, 0.18);
+  --shadow: 9px 11px 0 rgba(151, 108, 142, 0.12), 0 22px 48px rgba(93, 65, 90, 0.1);
+}
+
+body {
+  background: #f7efe4;
+}
+
+.access-gate,
+.page-shell {
+  background-color: #f8f0e6;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.34)),
+    linear-gradient(rgba(164, 126, 153, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(164, 126, 153, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 12% 16%, rgba(245, 188, 208, 0.5), transparent 25%),
+    radial-gradient(circle at 88% 82%, rgba(195, 220, 211, 0.56), transparent 26%);
+  background-size: auto, 28px 28px, 28px 28px, auto, auto;
+}
+
+.pastel-sky::before {
+  opacity: 0.42;
+  background-image: radial-gradient(rgba(111, 73, 104, 0.3) 0.8px, transparent 0.8px);
+  background-size: 19px 19px;
+}
+
+.pastel-orb {
+  filter: blur(18px);
+  opacity: 0.44;
+}
+
+.floating-doodle {
+  color: rgba(110, 75, 105, 0.4);
+}
+
+.access-card {
+  overflow: visible;
+  border: 2px solid rgba(102, 71, 96, 0.25);
+  border-radius: 18px;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 31px, rgba(137, 103, 130, 0.06) 31px 32px),
+    #fffdf8;
+  box-shadow: 13px 15px 0 #e5d4df, 0 26px 55px rgba(91, 61, 86, 0.12);
+  backdrop-filter: none;
+  transform: rotate(-0.5deg);
+}
+
+.access-card::before {
+  content: "♡";
+  left: -1.2rem;
+  bottom: -2.1rem;
+  color: #c47f9d;
+  font-size: 6.4rem;
+  transform: rotate(-13deg);
+}
+
+.access-card::after {
+  content: "just for you";
+  right: -0.8rem;
+  top: -0.9rem;
+  border: 1px solid rgba(109, 76, 104, 0.12);
+  padding: 0.42rem 0.8rem;
+  background: #f4d8df;
+  color: #7a526d;
+  font-family: var(--font-dancing-script), cursive;
+  font-size: 1.05rem;
+  transform: rotate(4deg);
+  box-shadow: 3px 4px 0 rgba(119, 82, 111, 0.1);
+}
+
+.access-lock {
+  border: 2px solid rgba(110, 76, 104, 0.16);
+  border-radius: 20px 20px 12px 12px;
+  background: #f1cad8;
+  box-shadow: 6px 7px 0 rgba(123, 86, 115, 0.12);
+}
+
+.access-form input,
+.access-form button {
+  border-radius: 10px;
+}
+
+.access-form input {
+  border: 1.5px solid rgba(102, 71, 96, 0.24);
+  background: #fffefa;
+  box-shadow: inset 0 -2px 0 rgba(116, 83, 109, 0.07);
+}
+
+.access-form button {
+  background: #8f657f;
+  box-shadow: 5px 6px 0 #dfc2d2;
+}
+
+.page-main {
+  width: min(980px, 90vw);
+  padding-top: clamp(5rem, 10vw, 7.5rem);
+  gap: 2rem;
+}
+
+.hero-card,
+.question-card,
+.letter-card,
+.gallery-card,
+.reasons-card,
+.timeline-card {
+  border: 1.5px solid rgba(105, 74, 99, 0.22);
+  border-radius: 12px;
+  background: #fffdf7;
+  box-shadow: var(--shadow);
+  backdrop-filter: none;
+}
+
+.hero-card {
+  min-height: 360px;
+  background:
+    linear-gradient(90deg, rgba(220, 164, 184, 0.13) 1px, transparent 1px),
+    linear-gradient(rgba(220, 164, 184, 0.13) 1px, transparent 1px),
+    #fffaf4;
+  background-size: 24px 24px;
+  transform: rotate(0.35deg);
+}
+
+.hero-card::before {
+  content: "♡";
+  left: 1.4rem;
+  bottom: 0.4rem;
+  color: rgba(171, 94, 128, 0.2);
+  font-size: 8rem;
+  transform: rotate(-12deg);
+}
+
+.hero-card::after {
+  content: "scrapbook edition";
+  right: 1.4rem;
+  top: 1.4rem;
+  border: 1px solid rgba(112, 79, 105, 0.16);
+  padding: 0.45rem 0.75rem;
+  background: #dce9df;
+  color: #6d6c64;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 0.65rem;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  transform: rotate(4deg);
+  box-shadow: 3px 4px 0 rgba(102, 79, 93, 0.1);
+}
+
+.hero-card h1 {
+  color: #79546c;
+  text-shadow: 2px 3px 0 #efdbe2;
+}
+
+.eyebrow {
+  border: 1px solid rgba(104, 73, 98, 0.18);
+  border-radius: 4px;
+  background: #f5dce3;
+  transform: rotate(-1deg);
+  box-shadow: 2px 3px 0 rgba(111, 76, 104, 0.09);
+}
+
+.hero-badges span {
+  border: 1px solid rgba(103, 73, 97, 0.15);
+  border-radius: 5px;
+  background: #fffdf8;
+  box-shadow: 3px 4px 0 rgba(111, 76, 104, 0.08);
+}
+
+.question-card {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 35px, rgba(113, 151, 171, 0.12) 35px 36px),
+    linear-gradient(90deg, transparent 0 56px, rgba(221, 142, 161, 0.17) 56px 58px, transparent 58px),
+    #fffcf5;
+}
+
+.question-card::before {
+  width: 132px;
+  height: 34px;
+  right: 52px;
+  top: -7px;
+  border-radius: 2px;
+  background: rgba(224, 197, 156, 0.72);
+  transform: rotate(4deg);
+}
+
+.question-card h2 {
+  color: #5f4358;
+  text-shadow: 2px 3px 0 rgba(224, 188, 205, 0.54);
+}
+
+.button-arena {
+  border: 1.5px dashed rgba(107, 76, 100, 0.3);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle, rgba(170, 111, 142, 0.17) 1px, transparent 1.5px),
+    rgba(250, 235, 240, 0.64);
+  background-size: 18px 18px;
+}
+
+.yes-button,
+.no-button {
+  border-radius: 7px;
+}
+
+.yes-button {
+  background: #8f637e;
+  box-shadow: 5px 6px 0 #e3bfd0;
+}
+
+.no-button {
+  border: 1.5px solid rgba(100, 71, 95, 0.23);
+  background: #fffdf7;
+  box-shadow: 4px 5px 0 rgba(112, 82, 105, 0.12);
+}
+
+.letter-card {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 34px, rgba(105, 142, 161, 0.1) 34px 35px),
+    #fffdf7;
+  transform: rotate(-0.18deg);
+}
+
+.envelope-card {
+  border: 1.5px solid rgba(105, 74, 99, 0.18);
+  border-radius: 8px;
+  background: #f6e5e8;
+  box-shadow: 7px 8px 0 rgba(140, 96, 126, 0.11);
+}
+
+.gift-choice,
+.reason-slide,
+.timeline-item {
+  border: 1.5px solid rgba(105, 74, 99, 0.16);
+  border-radius: 8px;
+  background: #fffaf6;
+  box-shadow: 4px 5px 0 rgba(118, 84, 108, 0.08);
+}
+
+.gift-choice.sunshine {
+  background: #fff7d9;
+}
+
+.gift-choice.chocolate {
+  background: #f4e6df;
+}
+
+.gift-choice.voice {
+  background: #e9e6f6;
+}
+
+.gift-choice-thumb,
+.gift-choice-icon,
+.timeline-image {
+  border-radius: 5px;
+}
+
+.reasons-card {
+  transform: rotate(0.28deg);
+}
+
+.timeline-card {
+  transform: rotate(-0.22deg);
+}
+
+.reason-actions button,
+.share-button {
+  border: 1.5px solid rgba(105, 74, 99, 0.19);
+  border-radius: 5px;
+  background: #fffaf3;
+  box-shadow: 3px 4px 0 rgba(110, 77, 103, 0.09);
+}
+
+.photo-tile {
+  min-height: 285px;
+  border: 12px solid #fffdf8;
+  border-bottom-width: 54px;
+  border-radius: 4px;
+  box-shadow: 7px 9px 0 rgba(119, 84, 108, 0.1), 0 16px 30px rgba(86, 61, 81, 0.1);
+}
+
+.photo-caption {
+  inset: auto -2px -46px;
+  padding: 0.55rem 0.25rem;
+  background: transparent;
+  color: #5e4c5d;
+  text-align: center;
+}
+
+.photo-caption p {
+  font-family: var(--font-dancing-script), cursive;
+  font-size: 1rem;
+}
+
+.photo-caption span {
+  color: #8d7b89;
+}
+
+.lightbox-content,
+.gift-card,
+.picker-card {
+  border-radius: 10px;
+  background: #fffdf8;
+}
+
+@media (max-width: 720px) {
+  .page-main {
+    width: min(93vw, 620px);
+  }
+
+  .hero-card,
+  .letter-card,
+  .reasons-card,
+  .timeline-card,
+  .access-card {
+    transform: none;
+  }
+
+  .hero-card::after {
+    right: 0.8rem;
+    top: 0.8rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .access-card {
+    padding-inline: 1.3rem;
+  }
+
+  .question-card {
+    background:
+      repeating-linear-gradient(0deg, transparent 0 35px, rgba(113, 151, 171, 0.11) 35px 36px),
+      #fffcf5;
+  }
+
+  .photo-tile {
+    border-bottom-width: 50px;
+  }
+}
