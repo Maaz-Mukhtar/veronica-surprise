@@ -12,12 +12,18 @@ import {
   useRef,
   useState,
 } from "react";
+import type {
+  CSSProperties,
+  KeyboardEvent as ReactKeyboardEvent,
+  PointerEvent as ReactPointerEvent,
+} from "react";
 import type { GiftCard } from "@/content";
 import { content, formatDisplayDate } from "@/content";
 import type { RecipientProfile } from "@/lib/recipients";
 
 type Answer = "yes" | null;
 type Position = { x: number; y: number };
+type NoTrail = Position & { id: number; symbol: string };
 
 const DODGE_COOLDOWN_MS = 250;
 
@@ -25,6 +31,154 @@ type VeronicaExperienceProps = {
   recipient?: RecipientProfile | null;
   allowQueryOverrides?: boolean;
 };
+
+type ScratchCardProps = {
+  instruction: string;
+  message: string;
+};
+
+function ScratchCard({ instruction, message }: ScratchCardProps) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const isDrawingRef = useRef(false);
+  const lastPointRef = useRef<Position | null>(null);
+  const scratchMoveCountRef = useRef(0);
+  const [isRevealed, setIsRevealed] = useState(false);
+
+  const paintCover = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || isRevealed) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.max(1, Math.floor(rect.width * ratio));
+    canvas.height = Math.max(1, Math.floor(rect.height * ratio));
+
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    const gradient = context.createLinearGradient(0, 0, rect.width, rect.height);
+    gradient.addColorStop(0, "#e5d5f3");
+    gradient.addColorStop(0.52, "#f6bfd2");
+    gradient.addColorStop(1, "#cbe8df");
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, rect.width, rect.height);
+
+    context.fillStyle = "rgba(92, 63, 111, 0.26)";
+    for (let x = 16; x < rect.width; x += 28) {
+      for (let y = 16; y < rect.height; y += 28) {
+        context.beginPath();
+        context.arc(x, y, 1.4, 0, Math.PI * 2);
+        context.fill();
+      }
+    }
+
+    context.fillStyle = "#654d73";
+    context.font = `800 ${Math.max(14, Math.min(21, rect.width * 0.045))}px sans-serif`;
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText("SCRATCH HERE ✦", rect.width / 2, rect.height / 2);
+  }, [isRevealed]);
+
+  useEffect(() => {
+    paintCover();
+    window.addEventListener("resize", paintCover);
+    return () => window.removeEventListener("resize", paintCover);
+  }, [paintCover]);
+
+  const pointFromEvent = useCallback((event: ReactPointerEvent<HTMLCanvasElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  }, []);
+
+  const scratchTo = useCallback((point: Position) => {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+    if (!canvas || !context) return;
+
+    const previous = lastPointRef.current ?? point;
+    context.save();
+    context.globalCompositeOperation = "destination-out";
+    context.lineWidth = 48;
+    context.lineCap = "round";
+    context.lineJoin = "round";
+    context.beginPath();
+    context.moveTo(previous.x, previous.y);
+    context.lineTo(point.x, point.y);
+    context.stroke();
+    context.restore();
+    lastPointRef.current = point;
+
+    scratchMoveCountRef.current += 1;
+    if (scratchMoveCountRef.current % 6 !== 0) return;
+
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    let samples = 0;
+    let transparentSamples = 0;
+    for (let index = 3; index < pixels.length; index += 4 * 24) {
+      samples += 1;
+      if (pixels[index] < 40) transparentSamples += 1;
+    }
+
+    if (samples > 0 && transparentSamples / samples > 0.34) {
+      setIsRevealed(true);
+      isDrawingRef.current = false;
+    }
+  }, []);
+
+  const startScratching = useCallback(
+    (event: ReactPointerEvent<HTMLCanvasElement>) => {
+      event.preventDefault();
+      event.currentTarget.setPointerCapture(event.pointerId);
+      isDrawingRef.current = true;
+      const point = pointFromEvent(event);
+      lastPointRef.current = point;
+      scratchTo(point);
+    },
+    [pointFromEvent, scratchTo],
+  );
+
+  const continueScratching = useCallback(
+    (event: ReactPointerEvent<HTMLCanvasElement>) => {
+      if (!isDrawingRef.current) return;
+      event.preventDefault();
+      scratchTo(pointFromEvent(event));
+    },
+    [pointFromEvent, scratchTo],
+  );
+
+  const stopScratching = useCallback(() => {
+    isDrawingRef.current = false;
+    lastPointRef.current = null;
+  }, []);
+
+  return (
+    <div className={`scratch-card ${isRevealed ? "is-revealed" : ""}`}>
+      <div className="scratch-hidden-message" aria-live="polite">
+        <span aria-hidden="true">♡</span>
+        <p>{message}</p>
+      </div>
+      {!isRevealed && (
+        <canvas
+          ref={canvasRef}
+          onPointerDown={startScratching}
+          onPointerMove={continueScratching}
+          onPointerUp={stopScratching}
+          onPointerCancel={stopScratching}
+          onPointerLeave={stopScratching}
+          aria-label={instruction}
+        />
+      )}
+      <button
+        type="button"
+        className="scratch-reveal-button"
+        onClick={() => setIsRevealed(true)}
+      >
+        {isRevealed ? "Secret revealed ✨" : "Reveal without scratching"}
+      </button>
+    </div>
+  );
+}
 
 export default function VeronicaExperience({
   recipient = null,
@@ -42,15 +196,28 @@ export default function VeronicaExperience({
   const [isEnvelopeOpen, setIsEnvelopeOpen] = useState(false);
   const [showChocolatePicker, setShowChocolatePicker] = useState(false);
   const [showVoiceNoteModal, setShowVoiceNoteModal] = useState(false);
+  const [showBouquetModal, setShowBouquetModal] = useState(false);
   const [activeGift, setActiveGift] = useState<GiftCard | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [flippedPhotoIndex, setFlippedPhotoIndex] = useState<number | null>(null);
   const [noPosition, setNoPosition] = useState<Position>({ x: 0, y: 0 });
+  const [noTrails, setNoTrails] = useState<NoTrail[]>([]);
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
   const [names, setNames] = useState({
     to: recipient?.to ?? content.names.to,
     from: recipient?.from ?? content.names.from,
   });
   const [reasonIndex, setReasonIndex] = useState(0);
+  const [timelineIndex, setTimelineIndex] = useState(0);
+  const [bloomedFlowers, setBloomedFlowers] = useState<Set<number>>(new Set());
+  const [activeBloomMessage, setActiveBloomMessage] = useState("");
+  const [isVoicePlaying, setIsVoicePlaying] = useState(false);
+  const [isHoldingHeart, setIsHoldingHeart] = useState(false);
+  const [heartbeatRevealed, setHeartbeatRevealed] = useState(false);
+  const [foundHiddenNotes, setFoundHiddenNotes] = useState<Set<number>>(new Set());
+  const [activeHiddenNote, setActiveHiddenNote] = useState<number | null>(null);
+  const [collectedWords, setCollectedWords] = useState<Set<number>>(new Set());
+  const [openedPromises, setOpenedPromises] = useState<Set<number>>(new Set());
 
   const questionRef = useRef<HTMLElement | null>(null);
   const revealRef = useRef<HTMLElement | null>(null);
@@ -59,6 +226,8 @@ export default function VeronicaExperience({
   const noButtonRef = useRef<HTMLButtonElement | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const lastDodgeRef = useRef(0);
+  const noTrailIdRef = useRef(0);
+  const heartHoldTimerRef = useRef<number | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
 
@@ -69,7 +238,7 @@ export default function VeronicaExperience({
     [],
   );
 
-  const canShowPrompts = hasStarted && noMoveCount >= 3 && !answer;
+  const canShowPrompts = hasStarted && noMoveCount >= 1 && !answer;
   const isShrinkMode =
     hasStarted && elapsedMs >= content.timing.shrinkNoAfterMs && !answer;
   const themeClass = `theme-${recipient?.themeAccent ?? content.theme.accent}`;
@@ -85,14 +254,26 @@ export default function VeronicaExperience({
   const showReasons = recipient?.showReasons ?? content.defaultSections.showReasons;
   const showTimeline = recipient?.showTimeline ?? content.defaultSections.showTimeline;
   const showMemories = recipient?.showMemories ?? content.defaultSections.showMemories;
+  const currentTimelineIndex = recipientTimeline.length
+    ? Math.min(timelineIndex, recipientTimeline.length - 1)
+    : 0;
+  const activeTimelineItem = recipientTimeline.length
+    ? recipientTimeline[currentTimelineIndex]
+    : null;
+  const allFlowersBloomed =
+    bloomedFlowers.size === content.interactive.bouquet.flowers.length;
+  const messageIsComplete =
+    collectedWords.size === content.interactive.messageBuilder.words.length;
 
   const promptText = canShowPrompts
-    ? content.prompts.funnyAfter5s[(noMoveCount - 3) % content.prompts.funnyAfter5s.length]
+    ? content.prompts.funnyAfter5s[(noMoveCount - 1) % content.prompts.funnyAfter5s.length]
     : "";
   const dodgeImageIndex = content.dodgeImages.length
-    ? noMoveCount % content.dodgeImages.length
+    ? Math.max(0, noMoveCount - 1) % content.dodgeImages.length
     : -1;
-  const dodgeImage = dodgeImageIndex >= 0 ? content.dodgeImages[dodgeImageIndex] : null;
+  const dodgeImage = noMoveCount > 0 && dodgeImageIndex >= 0
+    ? content.dodgeImages[dodgeImageIndex]
+    : null;
   const resolveText = useCallback(
     (input: string) => {
       const toValue = names.to.trim();
@@ -275,10 +456,24 @@ export default function VeronicaExperience({
       attempts += 1;
     }
 
+    noTrailIdRef.current += 1;
+    const trailSymbol =
+      content.interactive.runner.trailSymbols[
+        noMoveCount % content.interactive.runner.trailSymbols.length
+      ];
+    setNoTrails((current) => [
+      ...current.slice(-5),
+      {
+        id: noTrailIdRef.current,
+        x: noPosition.x + noRect.width / 2,
+        y: noPosition.y + noRect.height / 2,
+        symbol: trailSymbol,
+      },
+    ]);
     setNoPosition(candidate);
     setNoMoveCount((current) => current + 1);
     playDodgeSound();
-  }, [answer, elapsedMs, hasStarted, noPosition.x, noPosition.y, playDodgeSound]);
+  }, [answer, elapsedMs, hasStarted, noMoveCount, noPosition.x, noPosition.y, playDodgeSound]);
 
   const onYes = useCallback(() => {
     setAnswer("yes");
@@ -299,7 +494,7 @@ export default function VeronicaExperience({
 
     window.setTimeout(() => {
       setShowCelebration(false);
-    }, 2100);
+    }, 3800);
   }, [playYesStack, reducedMotion]);
 
   const toggleMute = useCallback(() => {
@@ -313,7 +508,91 @@ export default function VeronicaExperience({
   const openGift = useCallback((gift: GiftCard) => {
     setShowChocolatePicker(false);
     setShowVoiceNoteModal(false);
+    setShowBouquetModal(false);
     setActiveGift(gift);
+  }, []);
+
+  const bloomFlower = useCallback((index: number) => {
+    setBloomedFlowers((current) => {
+      const next = new Set(current);
+      next.add(index);
+      return next;
+    });
+    setActiveBloomMessage(content.interactive.bouquet.flowers[index].message);
+    void playTone(620 + index * 55, 880 + index * 70, 220, 0.08, "sine");
+  }, [playTone]);
+
+  const beginHeartHold = useCallback(() => {
+    if (heartbeatRevealed || heartHoldTimerRef.current !== null) return;
+    setIsHoldingHeart(true);
+    void playTone(180, 210, 260, 0.08, "sine");
+    heartHoldTimerRef.current = window.setTimeout(() => {
+      setHeartbeatRevealed(true);
+      setIsHoldingHeart(false);
+      heartHoldTimerRef.current = null;
+      void playTone(330, 620, 520, 0.1, "sine");
+    }, 1800);
+  }, [heartbeatRevealed, playTone]);
+
+  const stopHeartHold = useCallback(() => {
+    if (heartHoldTimerRef.current !== null) {
+      window.clearTimeout(heartHoldTimerRef.current);
+      heartHoldTimerRef.current = null;
+    }
+    if (!heartbeatRevealed) setIsHoldingHeart(false);
+  }, [heartbeatRevealed]);
+
+  const onHeartKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLButtonElement>) => {
+      if (event.key !== " " && event.key !== "Enter") return;
+      event.preventDefault();
+      beginHeartHold();
+    },
+    [beginHeartHold],
+  );
+
+  const onHeartKeyUp = useCallback(
+    (event: ReactKeyboardEvent<HTMLButtonElement>) => {
+      if (event.key !== " " && event.key !== "Enter") return;
+      event.preventDefault();
+      stopHeartHold();
+    },
+    [stopHeartHold],
+  );
+
+  const findHiddenNote = useCallback((index: number) => {
+    setFoundHiddenNotes((current) => {
+      const next = new Set(current);
+      next.add(index);
+      return next;
+    });
+    setActiveHiddenNote(index);
+  }, []);
+
+  const collectWord = useCallback((index: number) => {
+    if (collectedWords.has(index)) return;
+    const next = new Set(collectedWords);
+    next.add(index);
+    setCollectedWords(next);
+
+    if (next.size === content.interactive.messageBuilder.words.length) {
+      confetti({
+        particleCount: reducedMotion ? 35 : 80,
+        spread: 70,
+        origin: { y: 0.72 },
+        scalar: 0.75,
+      });
+      void playTone(540, 980, 420, 0.1, "triangle");
+    }
+  }, [collectedWords, playTone, reducedMotion]);
+
+  const togglePromise = useCallback((index: number) => {
+    setOpenedPromises((current) => {
+      const next = new Set(current);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
   }, []);
 
   const copyPersonalizedLink = useCallback(async () => {
@@ -414,6 +693,20 @@ export default function VeronicaExperience({
   }, []);
 
   useEffect(() => {
+    if (activeHiddenNote === null) return;
+    const timeout = window.setTimeout(() => setActiveHiddenNote(null), 4800);
+    return () => window.clearTimeout(timeout);
+  }, [activeHiddenNote]);
+
+  useEffect(() => {
+    return () => {
+      if (heartHoldTimerRef.current !== null) {
+        window.clearTimeout(heartHoldTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (isMuted && masterGainRef.current && audioContextRef.current) {
       const now = audioContextRef.current.currentTime;
       masterGainRef.current.gain.cancelScheduledValues(now);
@@ -507,6 +800,34 @@ export default function VeronicaExperience({
         <span className="floating-doodle doodle-three">♡</span>
         <span className="floating-doodle doodle-four">✧</span>
       </div>
+      <div className="hidden-note-layer" aria-label="Hidden love notes">
+        {content.interactive.hiddenNotes.map((note, index) => (
+          <button
+            key={`${note.symbol}-${index}`}
+            type="button"
+            className={`hidden-note hidden-note-${index + 1} ${
+              foundHiddenNotes.has(index) ? "is-found" : ""
+            }`}
+            onClick={() => findHiddenNote(index)}
+            aria-label={`Find hidden love note ${index + 1}`}
+          >
+            {note.symbol}
+          </button>
+        ))}
+      </div>
+      {activeHiddenNote !== null && (
+        <motion.div
+          className="hidden-note-toast"
+          initial={{ opacity: 0, y: 18, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          role="status"
+        >
+          <p>{content.interactive.hiddenNotes[activeHiddenNote].message}</p>
+          <span>
+            {foundHiddenNotes.size}/{content.interactive.hiddenNotes.length} secret notes found
+          </span>
+        </motion.div>
+      )}
       <button
         type="button"
         className="mute-toggle"
@@ -522,8 +843,15 @@ export default function VeronicaExperience({
           exit={{ opacity: 0 }}
           className="celebration-overlay"
         >
-          <h2>{content.prompts.yesCelebrationTitle}</h2>
-          <p>{content.prompts.yesCelebrationMsg}</p>
+          <div className="ring-box-scene" aria-hidden="true">
+            <span className="ring-box-lid" />
+            <span className="ring-box-ring">
+              <span className="ring-gem" />
+            </span>
+            <span className="ring-box-base" />
+          </div>
+          <h2>{content.interactive.ringBox.title}</h2>
+          <p>{content.interactive.ringBox.message}</p>
           {!reducedMotion && (
             <div className="heart-cloud" aria-hidden="true">
               {Array.from({ length: 12 }).map((_, index) => (
@@ -580,6 +908,19 @@ export default function VeronicaExperience({
             )}
 
             <div className="button-arena" ref={arenaRef}>
+              {noTrails.map((trail) => (
+                <motion.span
+                  key={trail.id}
+                  className="no-trail"
+                  style={{ left: trail.x, top: trail.y }}
+                  initial={{ opacity: 0.8, scale: 0.7, y: 0 }}
+                  animate={{ opacity: 0, scale: 1.2, y: -28 }}
+                  transition={{ duration: 1.4 }}
+                  aria-hidden="true"
+                >
+                  {trail.symbol}
+                </motion.span>
+              ))}
               <button
                 type="button"
                 ref={yesButtonRef}
@@ -647,14 +988,12 @@ export default function VeronicaExperience({
                   <button
                     type="button"
                     className="gift-choice flowers"
-                    onClick={() =>
-                      openGift({
-                        title: resolveText(content.gifts.bouquet.title),
-                        message: content.gifts.bouquet.message,
-                        imageSrc: content.gifts.bouquet.imageSrc,
-                        imageAlt: content.gifts.bouquet.imageAlt,
-                      })
-                    }
+                    onClick={() => {
+                      setActiveGift(null);
+                      setShowChocolatePicker(false);
+                      setShowVoiceNoteModal(false);
+                      setShowBouquetModal(true);
+                    }}
                   >
                     <span className="gift-choice-thumb">
                       <Image src={content.gifts.bouquet.imageSrc} alt="" fill sizes="64px" />
@@ -687,7 +1026,11 @@ export default function VeronicaExperience({
                   <button
                     type="button"
                     className="gift-choice chocolate"
-                    onClick={() => setShowChocolatePicker(true)}
+                    onClick={() => {
+                      setShowBouquetModal(false);
+                      setShowVoiceNoteModal(false);
+                      setShowChocolatePicker(true);
+                    }}
                   >
                     <span className="gift-choice-thumb">
                       <Image
@@ -709,6 +1052,8 @@ export default function VeronicaExperience({
                       onClick={() => {
                         setActiveGift(null);
                         setShowChocolatePicker(false);
+                        setShowBouquetModal(false);
+                        setIsVoicePlaying(false);
                         setShowVoiceNoteModal(true);
                       }}
                     >
@@ -720,6 +1065,110 @@ export default function VeronicaExperience({
                     </button>
                   )}
                 </div>
+              </div>
+            </article>
+
+            <article className="interactive-card scratch-section">
+              <p className="eyebrow">{content.interactive.scratchCard.eyebrow}</p>
+              <h3>{content.interactive.scratchCard.title}</h3>
+              <p className="interactive-instruction">
+                {content.interactive.scratchCard.instruction}
+              </p>
+              <ScratchCard
+                instruction={content.interactive.scratchCard.instruction}
+                message={content.interactive.scratchCard.hiddenMessage}
+              />
+            </article>
+
+            <article className="interactive-card heartbeat-card">
+              <p className="eyebrow">{content.interactive.heartbeat.eyebrow}</p>
+              <h3>{content.interactive.heartbeat.title}</h3>
+              <p className="interactive-instruction">
+                {content.interactive.heartbeat.instruction}
+              </p>
+              <button
+                type="button"
+                className={`heart-hold-button ${isHoldingHeart ? "is-holding" : ""} ${
+                  heartbeatRevealed ? "is-complete" : ""
+                }`}
+                onPointerDown={beginHeartHold}
+                onPointerUp={stopHeartHold}
+                onPointerLeave={stopHeartHold}
+                onPointerCancel={stopHeartHold}
+                onKeyDown={onHeartKeyDown}
+                onKeyUp={onHeartKeyUp}
+                aria-pressed={heartbeatRevealed}
+              >
+                <span className="heart-hold-icon" aria-hidden="true">♥</span>
+                <span>{heartbeatRevealed ? "Heart unlocked" : "Press and hold"}</span>
+              </button>
+              <motion.p
+                className="heartbeat-message"
+                initial={false}
+                animate={{ opacity: heartbeatRevealed ? 1 : 0.35 }}
+                aria-live="polite"
+              >
+                {heartbeatRevealed
+                  ? content.interactive.heartbeat.revealedMessage
+                  : "The message is waiting inside the heart..."}
+              </motion.p>
+            </article>
+
+            <article className="interactive-card message-builder-card">
+              <p className="eyebrow">{content.interactive.messageBuilder.eyebrow}</p>
+              <h3>{content.interactive.messageBuilder.title}</h3>
+              <p className="interactive-instruction">
+                {content.interactive.messageBuilder.instruction}
+              </p>
+              <div className="word-cloud">
+                {content.interactive.messageBuilder.words.map((word, index) => (
+                  <button
+                    key={`${word}-${index}`}
+                    type="button"
+                    className={collectedWords.has(index) ? "is-collected" : ""}
+                    style={{ "--word-index": index } as CSSProperties}
+                    onClick={() => collectWord(index)}
+                    disabled={collectedWords.has(index)}
+                  >
+                    {collectedWords.has(index) ? "♡" : word}
+                  </button>
+                ))}
+              </div>
+              <div className={`assembled-message ${messageIsComplete ? "is-complete" : ""}`}>
+                {messageIsComplete ? (
+                  <p>{content.interactive.messageBuilder.completeMessage}</p>
+                ) : (
+                  <p aria-live="polite">
+                    {content.interactive.messageBuilder.words.map((word, index) => (
+                      <span key={`${word}-slot`}>
+                        {collectedWords.has(index) ? word : "•••"}
+                      </span>
+                    ))}
+                  </p>
+                )}
+              </div>
+            </article>
+
+            <article className="interactive-card promises-card">
+              <p className="eyebrow">{content.interactive.promises.eyebrow}</p>
+              <h3>{content.interactive.promises.title}</h3>
+              <p className="interactive-instruction">
+                {content.interactive.promises.instruction}
+              </p>
+              <div className="promise-grid">
+                {content.interactive.promises.items.map((promise, index) => (
+                  <button
+                    key={promise.label}
+                    type="button"
+                    className={`promise-envelope ${openedPromises.has(index) ? "is-open" : ""}`}
+                    onClick={() => togglePromise(index)}
+                    aria-expanded={openedPromises.has(index)}
+                  >
+                    <span className="promise-flap" aria-hidden="true" />
+                    <strong>{promise.label}</strong>
+                    <span className="promise-message">{promise.message}</span>
+                  </button>
+                ))}
               </div>
             </article>
 
@@ -751,19 +1200,58 @@ export default function VeronicaExperience({
               <article className="timeline-card">
                 <p className="eyebrow">Our little timeline</p>
                 <h3>How we became us</h3>
-                <div className="timeline-list">
-                  {recipientTimeline.map((item) => (
-                    <div key={`${item.date}-${item.title}`} className="timeline-item">
-                      <div className="timeline-image">
-                        <Image src={item.imageSrc} alt={item.title} fill sizes="96px" />
+                <p className="interactive-instruction">
+                  {content.interactive.storybook.instruction}
+                </p>
+                <div className="timeline-book">
+                  {activeTimelineItem && (
+                    <motion.div
+                      key={`${activeTimelineItem.date}-${activeTimelineItem.title}`}
+                      className="timeline-page"
+                      initial={{ opacity: 0, rotateY: 9, x: 22 }}
+                      animate={{ opacity: 1, rotateY: 0, x: 0 }}
+                      transition={{ duration: 0.38 }}
+                    >
+                      <div className="timeline-page-image">
+                        <Image
+                          src={activeTimelineItem.imageSrc}
+                          alt={activeTimelineItem.title}
+                          fill
+                          sizes="(max-width: 720px) 100vw, 360px"
+                        />
                       </div>
-                      <div>
-                        <p className="timeline-date">{formatDisplayDate(item.date)}</p>
-                        <p className="timeline-title">{item.title}</p>
-                        <p className="timeline-note">{item.note}</p>
+                      <div className="timeline-page-copy">
+                        <p className="timeline-date">
+                          {formatDisplayDate(activeTimelineItem.date)}
+                        </p>
+                        <p className="timeline-title">{activeTimelineItem.title}</p>
+                        <p className="timeline-note">{activeTimelineItem.note}</p>
                       </div>
-                    </div>
-                  ))}
+                    </motion.div>
+                  )}
+                  <div className="timeline-controls">
+                    <button
+                      type="button"
+                      onClick={() => setTimelineIndex(Math.max(0, currentTimelineIndex - 1))}
+                      disabled={currentTimelineIndex === 0}
+                    >
+                      ← Previous page
+                    </button>
+                    <span>
+                      {Math.min(currentTimelineIndex + 1, recipientTimeline.length)} / {recipientTimeline.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setTimelineIndex(
+                          Math.min(recipientTimeline.length - 1, currentTimelineIndex + 1),
+                        )
+                      }
+                      disabled={currentTimelineIndex >= recipientTimeline.length - 1}
+                    >
+                      Next page →
+                    </button>
+                  </div>
                 </div>
               </article>
             )}
@@ -777,13 +1265,42 @@ export default function VeronicaExperience({
                     <button
                       key={item.src}
                       type="button"
-                      className="photo-tile"
-                      onClick={() => setLightboxIndex(index)}
+                      className={`photo-tile ${
+                        flippedPhotoIndex === index ? "is-flipped" : ""
+                      }`}
+                      onClick={() => {
+                        if (flippedPhotoIndex === index) {
+                          setLightboxIndex(index);
+                          return;
+                        }
+                        setFlippedPhotoIndex(index);
+                      }}
+                      aria-label={
+                        flippedPhotoIndex === index
+                          ? `Open ${item.caption ?? `photo ${index + 1}`}`
+                          : `Flip ${item.caption ?? `photo ${index + 1}`}`
+                      }
                     >
-                      <Image src={item.src} alt={item.caption ?? `Photo ${index + 1}`} fill sizes="(max-width: 768px) 100vw, 30vw" />
-                      <div className="photo-caption">
-                        {item.caption && <p>{item.caption}</p>}
-                        {item.date && <span>{formatDisplayDate(item.date)}</span>}
+                      <div className="photo-card-inner">
+                        <div className="photo-card-face photo-card-front">
+                          <Image
+                            src={item.src}
+                            alt={item.caption ?? `Photo ${index + 1}`}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 30vw"
+                          />
+                          <div className="photo-caption">
+                            {item.caption && <p>{item.caption}</p>}
+                            {item.date && <span>{formatDisplayDate(item.date)}</span>}
+                            <small>Tap to flip</small>
+                          </div>
+                        </div>
+                        <div className="photo-card-face photo-card-back">
+                          <span aria-hidden="true">♡</span>
+                          <p>{item.caption ?? "One of our favorite memories"}</p>
+                          <small>{item.date ? formatDisplayDate(item.date) : "You + me"}</small>
+                          <strong>Tap again to open the photo</strong>
+                        </div>
                       </div>
                     </button>
                   ))}
@@ -835,6 +1352,73 @@ export default function VeronicaExperience({
                 <span>{formatDisplayDate(recipientGallery[lightboxIndex].date)}</span>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {showBouquetModal && (
+        <div
+          className="gift-modal"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setShowBouquetModal(false)}
+        >
+          <button
+            type="button"
+            className="close-lightbox"
+            onClick={() => setShowBouquetModal(false)}
+            aria-label="Close interactive bouquet"
+          >
+            Close
+          </button>
+          <div className="bouquet-card" onClick={(event) => event.stopPropagation()}>
+            <p className="eyebrow">A bouquet for you</p>
+            <h3>{content.interactive.bouquet.title}</h3>
+            <p>{content.interactive.bouquet.instruction}</p>
+            <div className={`bouquet-stage ${allFlowersBloomed ? "is-complete" : ""}`}>
+              {content.interactive.bouquet.flowers.map((flower, index) => (
+                <button
+                  key={flower.label}
+                  type="button"
+                  className={`bloom-button bloom-${index + 1} ${
+                    bloomedFlowers.has(index) ? "is-bloomed" : ""
+                  }`}
+                  style={{ "--flower-index": index } as CSSProperties}
+                  onClick={() => bloomFlower(index)}
+                  aria-label={`${flower.label}: ${flower.message}`}
+                  aria-pressed={bloomedFlowers.has(index)}
+                >
+                  <span className="flower-stem" />
+                  <span className="flower-leaf flower-leaf-left" />
+                  <span className="flower-leaf flower-leaf-right" />
+                  <span className="flower-head" aria-hidden="true">
+                    {Array.from({ length: 6 }).map((_, petalIndex) => (
+                      <span key={petalIndex} className={`flower-petal petal-${petalIndex + 1}`} />
+                    ))}
+                    <span className="flower-center" />
+                  </span>
+                </button>
+              ))}
+              {allFlowersBloomed && (
+                <motion.div
+                  className="bouquet-reward"
+                  initial={{ opacity: 0, scale: 0.75 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                >
+                  <Image
+                    src={content.gifts.bouquet.imageSrc}
+                    alt={content.gifts.bouquet.imageAlt}
+                    fill
+                    sizes="280px"
+                  />
+                </motion.div>
+              )}
+            </div>
+            <p className="bloom-message" aria-live="polite">
+              {allFlowersBloomed
+                ? content.interactive.bouquet.completeMessage
+                : activeBloomMessage || "Each flower is hiding a little reason."}
+            </p>
           </div>
         </div>
       )}
@@ -926,12 +1510,18 @@ export default function VeronicaExperience({
           className="gift-modal"
           role="dialog"
           aria-modal="true"
-          onClick={() => setShowVoiceNoteModal(false)}
+          onClick={() => {
+            setShowVoiceNoteModal(false);
+            setIsVoicePlaying(false);
+          }}
         >
           <button
             type="button"
             className="close-lightbox"
-            onClick={() => setShowVoiceNoteModal(false)}
+            onClick={() => {
+              setShowVoiceNoteModal(false);
+              setIsVoicePlaying(false);
+            }}
             aria-label="Close voice note"
           >
             Close
@@ -939,9 +1529,32 @@ export default function VeronicaExperience({
           <div className="gift-card" onClick={(event) => event.stopPropagation()}>
             <h3>{resolveText(voiceNoteTitle)}</h3>
             <p>{resolveText(voiceNoteMessage)}</p>
-            <audio controls preload="none" className="voice-note-player">
-              <source src={voiceNoteSrc} />
-            </audio>
+            <div className={`cassette-player ${isVoicePlaying ? "is-playing" : ""}`}>
+              <div className="cassette-label">
+                <span>For {names.to}</span>
+                <strong>A little note from {names.from}</strong>
+              </div>
+              <div className="cassette-window" aria-hidden="true">
+                <span className="cassette-reel reel-left" />
+                <span className="cassette-tape" />
+                <span className="cassette-reel reel-right" />
+              </div>
+              <div className="cassette-lines" aria-hidden="true">
+                {Array.from({ length: 12 }).map((_, index) => (
+                  <span key={index} style={{ "--line-index": index } as CSSProperties} />
+                ))}
+              </div>
+              <audio
+                controls
+                preload="none"
+                className="voice-note-player"
+                onPlay={() => setIsVoicePlaying(true)}
+                onPause={() => setIsVoicePlaying(false)}
+                onEnded={() => setIsVoicePlaying(false)}
+              >
+                <source src={voiceNoteSrc} />
+              </audio>
+            </div>
           </div>
         </div>
       )}

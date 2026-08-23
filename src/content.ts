@@ -138,6 +138,79 @@ export const content = {
       imageSrc: "/photos/pic3.avif",
     },
   ] satisfies TimelineItem[],
+  interactive: {
+    ringBox: {
+      title: "You said yes! ✨",
+      message: "Then it is you and me—today, tomorrow, and for all our days after that.",
+    },
+    scratchCard: {
+      eyebrow: "A secret under the sparkles",
+      title: "Scratch to reveal",
+      instruction: "Use your finger or mouse to scratch the card.",
+      hiddenMessage: "My favorite future is every future that has you in it. ♡",
+    },
+    bouquet: {
+      title: "Grow your own bouquet",
+      instruction: "Tap every flower and watch it bloom.",
+      completeMessage: "A whole bouquet for the girl who makes my whole world bloom.",
+      flowers: [
+        { label: "Blush flower", message: "For your beautiful smile." },
+        { label: "Lavender flower", message: "For the calm you bring me." },
+        { label: "Golden flower", message: "For every day you make brighter." },
+        { label: "Blue flower", message: "For all the dreams we share." },
+        { label: "Pink flower", message: "For the love I will always choose." },
+      ],
+    },
+    heartbeat: {
+      eyebrow: "One message from my heart",
+      title: "Hold my heart",
+      instruction: "Press and hold until the heartbeat finishes.",
+      revealedMessage: "No matter where life takes us, my heart will keep finding its way back to you.",
+    },
+    storybook: {
+      instruction: "Turn the pages of our story.",
+    },
+    hiddenNotes: [
+      { symbol: "♡", message: "Secret note: I still get excited every time I see you." },
+      { symbol: "✿", message: "Secret note: Your hugs are my favorite place." },
+      { symbol: "✦", message: "Secret note: You make ordinary moments feel magical." },
+      { symbol: "♡", message: "Secret note: I would choose you in every lifetime." },
+      { symbol: "✿", message: "You found them all! My favorite discovery will always be you." },
+    ],
+    runner: {
+      trailSymbols: ["♡", "✦", "nope", "too slow", "✿"],
+    },
+    messageBuilder: {
+      eyebrow: "A tiny love game",
+      title: "Collect the floating words",
+      instruction: "Catch every word to build my message for you.",
+      words: ["I", "choose", "you", "every", "single", "day"],
+      completeMessage: "I choose you every single day. ♡",
+    },
+    promises: {
+      eyebrow: "A pocket full of promises",
+      title: "Open whenever you need one",
+      instruction: "Each little envelope is yours to keep.",
+      items: [
+        {
+          label: "Open when you miss me",
+          message: "Close your eyes and remember that I am missing you too—and loving you from wherever I am.",
+        },
+        {
+          label: "Open when you feel sad",
+          message: "You never have to carry a heavy day alone. I am always on your side.",
+        },
+        {
+          label: "Open when you need reassurance",
+          message: "I choose you clearly, completely, and again every day. You are safe in my love.",
+        },
+        {
+          label: "Open when you cannot sleep",
+          message: "Imagine me holding you close and reminding you that tomorrow is another day we get to share.",
+        },
+      ],
+    },
+  },
   defaultSections: {
     showReasons: true,
     showTimeline: true,
