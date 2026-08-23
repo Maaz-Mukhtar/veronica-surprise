@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Dancing_Script, Geist } from "next/font/google";
 import "./globals.css";
+import "./design-variant.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
