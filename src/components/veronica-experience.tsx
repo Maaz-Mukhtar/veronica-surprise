@@ -11,6 +11,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import type {
   CSSProperties,
@@ -19,6 +20,7 @@ import type {
 } from "react";
 import type { GiftCard } from "@/content";
 import { content, formatDisplayDate } from "@/content";
+import { MemoryGamesTeaser } from "@/features/memory-games/memory-games-hub";
 import type { RecipientProfile } from "@/lib/recipients";
 
 type Answer = "yes" | null;
@@ -27,6 +29,31 @@ type NoTrail = Position & { id: number; symbol: string };
 
 const DODGE_COOLDOWN_MS = 250;
 const CELEBRATION_DURATION_MS = 8000;
+const UNLOCK_EVENT = "veronica-site-unlock-changed";
+const MUTE_EVENT = "veronica-site-mute-changed";
+
+function subscribeToWindowEvent(eventName: string, listener: () => void) {
+  const notify = () => listener();
+  window.addEventListener(eventName, notify);
+  window.addEventListener("storage", notify);
+  return () => {
+    window.removeEventListener(eventName, notify);
+    window.removeEventListener("storage", notify);
+  };
+}
+
+function subscribeToUnlock(listener: () => void) {
+  return subscribeToWindowEvent(UNLOCK_EVENT, listener);
+}
+
+function subscribeToMute(listener: () => void) {
+  return subscribeToWindowEvent(MUTE_EVENT, listener);
+}
+
+function subscribeToLocation(listener: () => void) {
+  window.addEventListener("popstate", listener);
+  return () => window.removeEventListener("popstate", listener);
+}
 
 type VeronicaExperienceProps = {
   recipient?: RecipientProfile | null;
@@ -185,11 +212,24 @@ export default function VeronicaExperience({
   recipient = null,
   allowQueryOverrides = true,
 }: VeronicaExperienceProps) {
-  const [isUnlocked, setIsUnlocked] = useState(false);
+  const isUnlocked = useSyncExternalStore(
+    subscribeToUnlock,
+    () => window.sessionStorage.getItem("veronica-site-unlocked") === "true",
+    () => false,
+  );
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState(false);
   const hasStarted = isUnlocked;
-  const [isMuted, setIsMuted] = useState(false);
+  const isMuted = useSyncExternalStore(
+    subscribeToMute,
+    () => window.localStorage.getItem("veronica-surprise-muted") === "true",
+    () => false,
+  );
+  const locationSearch = useSyncExternalStore(
+    subscribeToLocation,
+    () => window.location.search,
+    () => "",
+  );
   const [answer, setAnswer] = useState<Answer>(null);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [noMoveCount, setNoMoveCount] = useState(0);
@@ -202,10 +242,6 @@ export default function VeronicaExperience({
   const [noPosition, setNoPosition] = useState<Position>({ x: 0, y: 0 });
   const [noTrails, setNoTrails] = useState<NoTrail[]>([]);
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
-  const [names, setNames] = useState({
-    to: recipient?.to ?? content.names.to,
-    from: recipient?.from ?? content.names.from,
-  });
   const [reasonIndex, setReasonIndex] = useState(0);
   const [timelineIndex, setTimelineIndex] = useState(0);
   const [isVoicePlaying, setIsVoicePlaying] = useState(false);
@@ -240,6 +276,19 @@ export default function VeronicaExperience({
   const canShowPrompts = hasStarted && noMoveCount >= 1 && !answer;
   const isShrinkMode =
     hasStarted && elapsedMs >= content.timing.shrinkNoAfterMs && !answer;
+  const names = useMemo(() => {
+    if (!allowQueryOverrides || recipient) {
+      return {
+        to: recipient?.to ?? content.names.to,
+        from: recipient?.from ?? content.names.from,
+      };
+    }
+    const params = new URLSearchParams(locationSearch);
+    return {
+      to: params.get("to")?.trim() || content.names.to,
+      from: params.get("from")?.trim() || content.names.from,
+    };
+  }, [allowQueryOverrides, locationSearch, recipient]);
   const themeClass = `theme-${recipient?.themeAccent ?? content.theme.accent}`;
   const letterTitle = recipient?.letterTitle ?? content.letter.title;
   const letterParagraphs = recipient?.customNote ?? content.letter.paragraphs;
@@ -364,9 +413,9 @@ export default function VeronicaExperience({
 
     if (passwordInput.trim() === content.access.password) {
       window.sessionStorage.setItem("veronica-site-unlocked", "true");
+      window.dispatchEvent(new Event(UNLOCK_EVENT));
       setPasswordError(false);
       setPasswordInput("");
-      setIsUnlocked(true);
       return;
     }
 
@@ -507,12 +556,9 @@ export default function VeronicaExperience({
   }, [finishCelebration, playYesStack, reducedMotion]);
 
   const toggleMute = useCallback(() => {
-    setIsMuted((current) => {
-      const next = !current;
-      window.localStorage.setItem("veronica-surprise-muted", String(next));
-      return next;
-    });
-  }, []);
+    window.localStorage.setItem("veronica-surprise-muted", String(!isMuted));
+    window.dispatchEvent(new Event(MUTE_EVENT));
+  }, [isMuted]);
 
   const openGift = useCallback((gift: GiftCard) => {
     setShowVoiceNoteModal(false);
@@ -638,29 +684,6 @@ export default function VeronicaExperience({
   );
 
   useEffect(() => {
-    if (window.sessionStorage.getItem("veronica-site-unlocked") === "true") {
-      setIsUnlocked(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!allowQueryOverrides || recipient) {
-      setNames({
-        to: recipient?.to ?? content.names.to,
-        from: recipient?.from ?? content.names.from,
-      });
-      return;
-    }
-    const params = new URLSearchParams(window.location.search);
-    const to = params.get("to")?.trim();
-    const from = params.get("from")?.trim();
-    setNames({
-      to: to || content.names.to,
-      from: from || content.names.from,
-    });
-  }, [allowQueryOverrides, recipient]);
-
-  useEffect(() => {
     if (!hasStarted || answer) {
       return;
     }
@@ -681,13 +704,6 @@ export default function VeronicaExperience({
   useLayoutEffect(() => {
     placeNoNearDefault();
   }, [placeNoNearDefault]);
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem("veronica-surprise-muted");
-    if (stored === "true") {
-      setIsMuted(true);
-    }
-  }, []);
 
   useEffect(() => {
     if (activeHiddenNote === null) return;
@@ -1157,7 +1173,7 @@ export default function VeronicaExperience({
             )}
 
             {showTimeline && (
-              <article className="timeline-card">
+              <article className="timeline-card" id="our-timeline">
                 <p className="eyebrow">Our little timeline</p>
                 <h3>How we became us</h3>
                 <p className="interactive-instruction">
@@ -1267,6 +1283,8 @@ export default function VeronicaExperience({
                 </div>
               </article>
             )}
+
+            <MemoryGamesTeaser />
           </section>
         )}
 
