@@ -6,11 +6,6 @@ export type GalleryItem = {
 
 export type AccentTheme = "pink" | "yellow" | "blue" | "pastel";
 
-export type DodgeImageItem = {
-  src: string;
-  alt: string;
-};
-
 export type GiftCard = {
   title: string;
   message: string;
@@ -56,7 +51,7 @@ export const content = {
     eyebrow: "One important question",
     text: "WILL YOU MARRY ME?",
     tease: "I dare you to try to click No -.- You better not.",
-    yesText: "Always ✨",
+    yesText: "Yes <3",
     noText: "No 🙈",
   },
   prompts: {
@@ -72,11 +67,6 @@ export const content = {
     yesCelebrationTitle: "Correct answer! ✨",
     yesCelebrationMsg: "You will always be my favorite person.",
   },
-  dodgeImages: [
-    { src: "/photos/pic1.jpg", alt: "A cute pastel reaction" },
-    { src: "/photos/pic2.avif", alt: "A playful pastel reaction" },
-    { src: "/photos/pic3.avif", alt: "A sweet pastel reaction" },
-  ] satisfies DodgeImageItem[],
   timing: {
     noDodgeStartMs: 0,
     showPromptsAfterMs: 5000,
@@ -84,19 +74,19 @@ export const content = {
   },
   gallery: [
     {
-      src: "/photos/01.svg",
-      caption: "One of our favorite little moments",
+      src: "/photos/memory-birds.png",
+      caption: "Staring at birds and being silly with my Mahal. Perfect days.",
       date: "A memory to keep",
     },
     {
-      src: "/photos/02.svg",
+      src: "/photos/memory-matcha.png",
       caption: "You make ordinary days feel special",
       date: "You + me",
     },
     {
-      src: "/photos/03.svg",
-      caption: "More memories belong right here",
-      date: "Still being written",
+      src: "/photos/memory-engaged.png",
+      caption: "The day we got engaged",
+      date: "2026-08-22",
     },
   ] satisfies GalleryItem[],
   letter: {
@@ -129,7 +119,7 @@ export const content = {
       date: "Chapter two",
       title: "The famous BEACH DAY",
       note: "Oh, where to even begin? Maybe it was one of the most impactful and best days of our lives. I still remember, as clearly as day, sitting on the ground floor of your building and watching you come down the escalator. I remember how fast my heart was beating with excitement. I remember how you turned around on the escalator and made that ‘I am watching you’ gesture with your hand. Kilig. I was so happy that I got to see you again after our first date. Once again, I was awestruck and lost in your beauty as I watched you come closer and closer to me. After you made this introvert meet your friend, we made our way down to the beach. The sun was shining brightly and making us sweat, but little did I know at the time that this was just the first of many, many sweaty days. If I were ever to describe a perfect date, I would think of our beach date. You do not know how special that day was, and still is, to me. I loved walking beside you on the beach, sharing stories, and getting to know this girl I was falling in love with more and more. The more I got to know you, the more I fell in love. I loved walking with you, riding the scooter with you, having an iced Americano with you at Tim Hortons, and then just lying next to you on the beach, listening to the waves crash on the sand. In that moment, I thought, ‘I never want this day to end.’ In a way, that day never ended—we have been together ever since.",
-      imageSrc: "/photos/pic2.avif",
+      imageSrc: "/photos/chapter-two-beach-day.png",
     },
     {
       date: "Chapter three",
@@ -138,6 +128,68 @@ export const content = {
       imageSrc: "/photos/pic3.avif",
     },
   ] satisfies TimelineItem[],
+  interactive: {
+    ringBox: {
+      title: "You said yes! ✨",
+      message: "Then it is you and me—today, tomorrow, and for all our days after that.",
+    },
+    scratchCard: {
+      eyebrow: "A secret under the sparkles",
+      title: "Scratch to reveal",
+      instruction: "Use your finger or mouse to scratch the card.",
+      hiddenMessage: "My favorite future is every future that has you in it. ♡",
+    },
+    heartbeat: {
+      eyebrow: "One message from my heart",
+      title: "Hold my heart",
+      instruction: "Press and hold until the heartbeat finishes.",
+      revealedMessage: "No matter where life takes us, my heart will keep finding its way back to you.",
+    },
+    storybook: {
+      instruction: "Turn the pages of our story.",
+    },
+    hiddenNotes: [
+      { symbol: "♡", message: "Secret note: I still get excited every time I see you." },
+      { symbol: "✿", message: "Secret note: Your hugs are my favorite place." },
+      { symbol: "✦", message: "Secret note: You make ordinary moments feel magical." },
+      { symbol: "♡", message: "Secret note: I would choose you in every lifetime." },
+      { symbol: "✿", message: "You found them all! My favorite discovery will always be you." },
+    ],
+    runner: {
+      trailSymbols: ["♡", "✦", "nope", "too slow", "✿"],
+    },
+    messageBuilder: {
+      eyebrow: "A tiny love game",
+      title: "Collect the floating words",
+      instruction: "Catch every word to build my message for you.",
+      words: ["Across", "every", "lifetime,", "my", "heart", "will", "always", "find", "you."],
+      wordOrder: [4, 1, 7, 2, 5, 0, 8, 6, 3],
+      completeMessage: "Across every lifetime, my heart will always find you. ♡",
+    },
+    promises: {
+      eyebrow: "A pocket full of promises",
+      title: "Open whenever you need one",
+      instruction: "Each little envelope is yours to keep.",
+      items: [
+        {
+          label: "Open when you miss me",
+          message: "Close your eyes and remember that I am missing you too—and loving you from wherever I am.",
+        },
+        {
+          label: "Open when you feel sad",
+          message: "You never have to carry a heavy day alone. I am always on your side.",
+        },
+        {
+          label: "Open when you need reassurance",
+          message: "I choose you clearly, completely, and again every day. You are safe in my love.",
+        },
+        {
+          label: "Open when you cannot sleep",
+          message: "Imagine me holding you close and reminding you that tomorrow is another day we get to share.",
+        },
+      ],
+    },
+  },
   defaultSections: {
     showReasons: true,
     showTimeline: true,
@@ -151,40 +203,6 @@ export const content = {
       imageSrc: "/gifts/bouquet.svg",
       imageAlt: "A bouquet of flowers",
     } satisfies GiftCard & { buttonText: string },
-    sunflowers: {
-      buttonText: "Pocket sunshine ☀",
-      title: "A little sunshine for {to}",
-      message: "For every day that could use a little extra brightness.",
-      imageSrc: "/gifts/sunflowers.svg",
-      imageAlt: "A bunch of sunflowers",
-    } satisfies GiftCard & { buttonText: string },
-    chocolates: {
-      buttonText: "Pick a treat 🍫",
-      pickerTitle: "Choose a tiny treat",
-      pickerMessage: "There is no wrong answer here. Unlike the other question.",
-      title: "A sweet treat for you",
-      message: "A tiny online treat for my favorite person.",
-      options: [
-        {
-          id: "milk",
-          label: "Milk Chocolate",
-          imageSrc: "/gifts/choco-milk.svg",
-          imageAlt: "Milk chocolate gift box",
-        },
-        {
-          id: "dark",
-          label: "Dark Chocolate",
-          imageSrc: "/gifts/choco-dark.svg",
-          imageAlt: "Dark chocolate gift box",
-        },
-        {
-          id: "white",
-          label: "White Chocolate",
-          imageSrc: "/gifts/choco-white.svg",
-          imageAlt: "White chocolate gift box",
-        },
-      ],
-    },
     voiceNote: {
       buttonText: "A note from Mahal ♫",
       title: "A voice note for {to}",
