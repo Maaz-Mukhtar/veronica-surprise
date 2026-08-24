@@ -6,11 +6,6 @@ export type GalleryItem = {
 
 export type AccentTheme = "pink" | "yellow" | "blue" | "pastel";
 
-export type DodgeImageItem = {
-  src: string;
-  alt: string;
-};
-
 export type GiftCard = {
   title: string;
   message: string;
@@ -56,7 +51,7 @@ export const content = {
     eyebrow: "One important question",
     text: "WILL YOU MARRY ME?",
     tease: "I dare you to try to click No -.- You better not.",
-    yesText: "Always ✨",
+    yesText: "Yes <3",
     noText: "No 🙈",
   },
   prompts: {
@@ -72,11 +67,6 @@ export const content = {
     yesCelebrationTitle: "Correct answer! ✨",
     yesCelebrationMsg: "You will always be my favorite person.",
   },
-  dodgeImages: [
-    { src: "/photos/pic1.jpg", alt: "A cute pastel reaction" },
-    { src: "/photos/pic2.avif", alt: "A playful pastel reaction" },
-    { src: "/photos/pic3.avif", alt: "A sweet pastel reaction" },
-  ] satisfies DodgeImageItem[],
   timing: {
     noDodgeStartMs: 0,
     showPromptsAfterMs: 5000,
@@ -84,19 +74,19 @@ export const content = {
   },
   gallery: [
     {
-      src: "/photos/01.svg",
-      caption: "One of our favorite little moments",
+      src: "/photos/memory-birds.png",
+      caption: "Staring at birds and being silly with my Mahal. Perfect days.",
       date: "A memory to keep",
     },
     {
-      src: "/photos/02.svg",
+      src: "/photos/memory-matcha.png",
       caption: "You make ordinary days feel special",
       date: "You + me",
     },
     {
-      src: "/photos/03.svg",
-      caption: "More memories belong right here",
-      date: "Still being written",
+      src: "/photos/memory-engaged.png",
+      caption: "The day we got engaged",
+      date: "2026-08-22",
     },
   ] satisfies GalleryItem[],
   letter: {
@@ -129,7 +119,7 @@ export const content = {
       date: "Chapter two",
       title: "The famous BEACH DAY",
       note: "Oh, where to even begin? Maybe it was one of the most impactful and best days of our lives. I still remember, as clearly as day, sitting on the ground floor of your building and watching you come down the escalator. I remember how fast my heart was beating with excitement. I remember how you turned around on the escalator and made that ‘I am watching you’ gesture with your hand. Kilig. I was so happy that I got to see you again after our first date. Once again, I was awestruck and lost in your beauty as I watched you come closer and closer to me. After you made this introvert meet your friend, we made our way down to the beach. The sun was shining brightly and making us sweat, but little did I know at the time that this was just the first of many, many sweaty days. If I were ever to describe a perfect date, I would think of our beach date. You do not know how special that day was, and still is, to me. I loved walking beside you on the beach, sharing stories, and getting to know this girl I was falling in love with more and more. The more I got to know you, the more I fell in love. I loved walking with you, riding the scooter with you, having an iced Americano with you at Tim Hortons, and then just lying next to you on the beach, listening to the waves crash on the sand. In that moment, I thought, ‘I never want this day to end.’ In a way, that day never ended—we have been together ever since.",
-      imageSrc: "/photos/pic2.avif",
+      imageSrc: "/photos/chapter-two-beach-day.png",
     },
     {
       date: "Chapter three",
@@ -148,18 +138,6 @@ export const content = {
       title: "Scratch to reveal",
       instruction: "Use your finger or mouse to scratch the card.",
       hiddenMessage: "My favorite future is every future that has you in it. ♡",
-    },
-    bouquet: {
-      title: "Grow your own bouquet",
-      instruction: "Tap every flower and watch it bloom.",
-      completeMessage: "A whole bouquet for the girl who makes my whole world bloom.",
-      flowers: [
-        { label: "Blush flower", message: "For your beautiful smile." },
-        { label: "Lavender flower", message: "For the calm you bring me." },
-        { label: "Golden flower", message: "For every day you make brighter." },
-        { label: "Blue flower", message: "For all the dreams we share." },
-        { label: "Pink flower", message: "For the love I will always choose." },
-      ],
     },
     heartbeat: {
       eyebrow: "One message from my heart",
@@ -184,8 +162,9 @@ export const content = {
       eyebrow: "A tiny love game",
       title: "Collect the floating words",
       instruction: "Catch every word to build my message for you.",
-      words: ["I", "choose", "you", "every", "single", "day"],
-      completeMessage: "I choose you every single day. ♡",
+      words: ["Across", "every", "lifetime,", "my", "heart", "will", "always", "find", "you."],
+      wordOrder: [4, 1, 7, 2, 5, 0, 8, 6, 3],
+      completeMessage: "Across every lifetime, my heart will always find you. ♡",
     },
     promises: {
       eyebrow: "A pocket full of promises",
@@ -224,40 +203,6 @@ export const content = {
       imageSrc: "/gifts/bouquet.svg",
       imageAlt: "A bouquet of flowers",
     } satisfies GiftCard & { buttonText: string },
-    sunflowers: {
-      buttonText: "Pocket sunshine ☀",
-      title: "A little sunshine for {to}",
-      message: "For every day that could use a little extra brightness.",
-      imageSrc: "/gifts/sunflowers.svg",
-      imageAlt: "A bunch of sunflowers",
-    } satisfies GiftCard & { buttonText: string },
-    chocolates: {
-      buttonText: "Pick a treat 🍫",
-      pickerTitle: "Choose a tiny treat",
-      pickerMessage: "There is no wrong answer here. Unlike the other question.",
-      title: "A sweet treat for you",
-      message: "A tiny online treat for my favorite person.",
-      options: [
-        {
-          id: "milk",
-          label: "Milk Chocolate",
-          imageSrc: "/gifts/choco-milk.svg",
-          imageAlt: "Milk chocolate gift box",
-        },
-        {
-          id: "dark",
-          label: "Dark Chocolate",
-          imageSrc: "/gifts/choco-dark.svg",
-          imageAlt: "Dark chocolate gift box",
-        },
-        {
-          id: "white",
-          label: "White Chocolate",
-          imageSrc: "/gifts/choco-white.svg",
-          imageAlt: "White chocolate gift box",
-        },
-      ],
-    },
     voiceNote: {
       buttonText: "A note from Mahal ♫",
       title: "A voice note for {to}",

@@ -26,6 +26,7 @@ type Position = { x: number; y: number };
 type NoTrail = Position & { id: number; symbol: string };
 
 const DODGE_COOLDOWN_MS = 250;
+const CELEBRATION_DURATION_MS = 8000;
 
 type VeronicaExperienceProps = {
   recipient?: RecipientProfile | null;
@@ -120,7 +121,7 @@ function ScratchCard({ instruction, message }: ScratchCardProps) {
       if (pixels[index] < 40) transparentSamples += 1;
     }
 
-    if (samples > 0 && transparentSamples / samples > 0.34) {
+    if (samples > 0 && transparentSamples / samples >= 0.75) {
       setIsRevealed(true);
       isDrawingRef.current = false;
     }
@@ -194,9 +195,7 @@ export default function VeronicaExperience({
   const [noMoveCount, setNoMoveCount] = useState(0);
   const [showCelebration, setShowCelebration] = useState(false);
   const [isEnvelopeOpen, setIsEnvelopeOpen] = useState(false);
-  const [showChocolatePicker, setShowChocolatePicker] = useState(false);
   const [showVoiceNoteModal, setShowVoiceNoteModal] = useState(false);
-  const [showBouquetModal, setShowBouquetModal] = useState(false);
   const [activeGift, setActiveGift] = useState<GiftCard | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [flippedPhotoIndex, setFlippedPhotoIndex] = useState<number | null>(null);
@@ -209,8 +208,6 @@ export default function VeronicaExperience({
   });
   const [reasonIndex, setReasonIndex] = useState(0);
   const [timelineIndex, setTimelineIndex] = useState(0);
-  const [bloomedFlowers, setBloomedFlowers] = useState<Set<number>>(new Set());
-  const [activeBloomMessage, setActiveBloomMessage] = useState("");
   const [isVoicePlaying, setIsVoicePlaying] = useState(false);
   const [isHoldingHeart, setIsHoldingHeart] = useState(false);
   const [heartbeatRevealed, setHeartbeatRevealed] = useState(false);
@@ -228,6 +225,7 @@ export default function VeronicaExperience({
   const lastDodgeRef = useRef(0);
   const noTrailIdRef = useRef(0);
   const heartHoldTimerRef = useRef<number | null>(null);
+  const celebrationTimerRef = useRef<number | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
 
@@ -260,20 +258,12 @@ export default function VeronicaExperience({
   const activeTimelineItem = recipientTimeline.length
     ? recipientTimeline[currentTimelineIndex]
     : null;
-  const allFlowersBloomed =
-    bloomedFlowers.size === content.interactive.bouquet.flowers.length;
   const messageIsComplete =
     collectedWords.size === content.interactive.messageBuilder.words.length;
 
   const promptText = canShowPrompts
     ? content.prompts.funnyAfter5s[(noMoveCount - 1) % content.prompts.funnyAfter5s.length]
     : "";
-  const dodgeImageIndex = content.dodgeImages.length
-    ? Math.max(0, noMoveCount - 1) % content.dodgeImages.length
-    : -1;
-  const dodgeImage = noMoveCount > 0 && dodgeImageIndex >= 0
-    ? content.dodgeImages[dodgeImageIndex]
-    : null;
   const resolveText = useCallback(
     (input: string) => {
       const toValue = names.to.trim();
@@ -359,7 +349,7 @@ export default function VeronicaExperience({
     const starts = [680, 760, 840];
     const index = Math.floor(Math.random() * starts.length);
     const jitter = Math.random() * 26;
-    void playTone(starts[index] + jitter, starts[index] + 80 + jitter, 120, 0.11, "triangle");
+    void playTone(starts[index] + jitter, starts[index] + 80 + jitter, 140, 0.24, "triangle");
   }, [playTone]);
 
   const playYesStack = useCallback(() => {
@@ -475,6 +465,17 @@ export default function VeronicaExperience({
     playDodgeSound();
   }, [answer, elapsedMs, hasStarted, noMoveCount, noPosition.x, noPosition.y, playDodgeSound]);
 
+  const finishCelebration = useCallback((behavior: ScrollBehavior = "auto") => {
+    if (celebrationTimerRef.current !== null) {
+      window.clearTimeout(celebrationTimerRef.current);
+      celebrationTimerRef.current = null;
+    }
+    setShowCelebration(false);
+    window.requestAnimationFrame(() => {
+      revealRef.current?.scrollIntoView({ behavior, block: "start" });
+    });
+  }, []);
+
   const onYes = useCallback(() => {
     setAnswer("yes");
     setIsEnvelopeOpen(false);
@@ -488,14 +489,10 @@ export default function VeronicaExperience({
       scalar: reducedMotion ? 0.8 : 1,
     });
 
-    window.setTimeout(() => {
-      revealRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, reducedMotion ? 450 : 1100);
-
-    window.setTimeout(() => {
-      setShowCelebration(false);
-    }, 3800);
-  }, [playYesStack, reducedMotion]);
+    celebrationTimerRef.current = window.setTimeout(() => {
+      finishCelebration("smooth");
+    }, CELEBRATION_DURATION_MS);
+  }, [finishCelebration, playYesStack, reducedMotion]);
 
   const toggleMute = useCallback(() => {
     setIsMuted((current) => {
@@ -506,21 +503,9 @@ export default function VeronicaExperience({
   }, []);
 
   const openGift = useCallback((gift: GiftCard) => {
-    setShowChocolatePicker(false);
     setShowVoiceNoteModal(false);
-    setShowBouquetModal(false);
     setActiveGift(gift);
   }, []);
-
-  const bloomFlower = useCallback((index: number) => {
-    setBloomedFlowers((current) => {
-      const next = new Set(current);
-      next.add(index);
-      return next;
-    });
-    setActiveBloomMessage(content.interactive.bouquet.flowers[index].message);
-    void playTone(620 + index * 55, 880 + index * 70, 220, 0.08, "sine");
-  }, [playTone]);
 
   const beginHeartHold = useCallback(() => {
     if (heartbeatRevealed || heartHoldTimerRef.current !== null) return;
@@ -703,6 +688,9 @@ export default function VeronicaExperience({
       if (heartHoldTimerRef.current !== null) {
         window.clearTimeout(heartHoldTimerRef.current);
       }
+      if (celebrationTimerRef.current !== null) {
+        window.clearTimeout(celebrationTimerRef.current);
+      }
     };
   }, []);
 
@@ -842,6 +830,15 @@ export default function VeronicaExperience({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="celebration-overlay"
+          role="button"
+          tabIndex={0}
+          aria-label="Continue to the next part"
+          onClick={() => finishCelebration("auto")}
+          onKeyDown={(event) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            finishCelebration("auto");
+          }}
         >
           <div className="ring-box-scene" aria-hidden="true">
             <span className="ring-box-lid" />
@@ -852,6 +849,7 @@ export default function VeronicaExperience({
           </div>
           <h2>{content.interactive.ringBox.title}</h2>
           <p>{content.interactive.ringBox.message}</p>
+          <span className="celebration-skip">Tap anywhere to continue</span>
           {!reducedMotion && (
             <div className="heart-cloud" aria-hidden="true">
               {Array.from({ length: 12 }).map((_, index) => (
@@ -896,17 +894,6 @@ export default function VeronicaExperience({
             <p className="prompt-line" aria-live="polite">
               {promptText}
             </p>
-            {dodgeImage && (
-              <div className="dodge-image-frame" aria-live="polite">
-                <Image
-                  src={dodgeImage.src}
-                  alt={dodgeImage.alt}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 540px"
-                />
-              </div>
-            )}
-
             <div className="button-arena" ref={arenaRef}>
               {noTrails.map((trail) => (
                 <motion.span
@@ -988,12 +975,14 @@ export default function VeronicaExperience({
                   <button
                     type="button"
                     className="gift-choice flowers"
-                    onClick={() => {
-                      setActiveGift(null);
-                      setShowChocolatePicker(false);
-                      setShowVoiceNoteModal(false);
-                      setShowBouquetModal(true);
-                    }}
+                    onClick={() =>
+                      openGift({
+                        title: resolveText(content.gifts.bouquet.title),
+                        message: content.gifts.bouquet.message,
+                        imageSrc: content.gifts.bouquet.imageSrc,
+                        imageAlt: content.gifts.bouquet.imageAlt,
+                      })
+                    }
                   >
                     <span className="gift-choice-thumb">
                       <Image src={content.gifts.bouquet.imageSrc} alt="" fill sizes="64px" />
@@ -1003,56 +992,12 @@ export default function VeronicaExperience({
                       <small>Open your bouquet</small>
                     </span>
                   </button>
-                  <button
-                    type="button"
-                    className="gift-choice sunshine"
-                    onClick={() =>
-                      openGift({
-                        title: resolveText(content.gifts.sunflowers.title),
-                        message: content.gifts.sunflowers.message,
-                        imageSrc: content.gifts.sunflowers.imageSrc,
-                        imageAlt: content.gifts.sunflowers.imageAlt,
-                      })
-                    }
-                  >
-                    <span className="gift-choice-thumb">
-                      <Image src={content.gifts.sunflowers.imageSrc} alt="" fill sizes="64px" />
-                    </span>
-                    <span>
-                      <strong>{content.gifts.sunflowers.buttonText}</strong>
-                      <small>Open some sunshine</small>
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    className="gift-choice chocolate"
-                    onClick={() => {
-                      setShowBouquetModal(false);
-                      setShowVoiceNoteModal(false);
-                      setShowChocolatePicker(true);
-                    }}
-                  >
-                    <span className="gift-choice-thumb">
-                      <Image
-                        src={content.gifts.chocolates.options[0].imageSrc}
-                        alt=""
-                        fill
-                        sizes="64px"
-                      />
-                    </span>
-                    <span>
-                      <strong>{content.gifts.chocolates.buttonText}</strong>
-                      <small>Choose your favorite</small>
-                    </span>
-                  </button>
                   {canShowVoiceNote && (
                     <button
                       type="button"
                       className="gift-choice voice"
                       onClick={() => {
                         setActiveGift(null);
-                        setShowChocolatePicker(false);
-                        setShowBouquetModal(false);
                         setIsVoicePlaying(false);
                         setShowVoiceNoteModal(true);
                       }}
@@ -1121,18 +1066,21 @@ export default function VeronicaExperience({
                 {content.interactive.messageBuilder.instruction}
               </p>
               <div className="word-cloud">
-                {content.interactive.messageBuilder.words.map((word, index) => (
-                  <button
-                    key={`${word}-${index}`}
-                    type="button"
-                    className={collectedWords.has(index) ? "is-collected" : ""}
-                    style={{ "--word-index": index } as CSSProperties}
-                    onClick={() => collectWord(index)}
-                    disabled={collectedWords.has(index)}
-                  >
-                    {collectedWords.has(index) ? "♡" : word}
-                  </button>
-                ))}
+                {content.interactive.messageBuilder.wordOrder.map((wordIndex, displayIndex) => {
+                  const word = content.interactive.messageBuilder.words[wordIndex];
+                  return (
+                    <button
+                      key={`${word}-${wordIndex}`}
+                      type="button"
+                      className={collectedWords.has(wordIndex) ? "is-collected" : ""}
+                      style={{ "--word-index": displayIndex } as CSSProperties}
+                      onClick={() => collectWord(wordIndex)}
+                      disabled={collectedWords.has(wordIndex)}
+                    >
+                      {collectedWords.has(wordIndex) ? "♡" : word}
+                    </button>
+                  );
+                })}
               </div>
               <div className={`assembled-message ${messageIsComplete ? "is-complete" : ""}`}>
                 {messageIsComplete ? (
@@ -1351,125 +1299,6 @@ export default function VeronicaExperience({
               {recipientGallery[lightboxIndex].date && (
                 <span>{formatDisplayDate(recipientGallery[lightboxIndex].date)}</span>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showBouquetModal && (
-        <div
-          className="gift-modal"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setShowBouquetModal(false)}
-        >
-          <button
-            type="button"
-            className="close-lightbox"
-            onClick={() => setShowBouquetModal(false)}
-            aria-label="Close interactive bouquet"
-          >
-            Close
-          </button>
-          <div className="bouquet-card" onClick={(event) => event.stopPropagation()}>
-            <p className="eyebrow">A bouquet for you</p>
-            <h3>{content.interactive.bouquet.title}</h3>
-            <p>{content.interactive.bouquet.instruction}</p>
-            <div className={`bouquet-stage ${allFlowersBloomed ? "is-complete" : ""}`}>
-              {content.interactive.bouquet.flowers.map((flower, index) => (
-                <button
-                  key={flower.label}
-                  type="button"
-                  className={`bloom-button bloom-${index + 1} ${
-                    bloomedFlowers.has(index) ? "is-bloomed" : ""
-                  }`}
-                  style={{ "--flower-index": index } as CSSProperties}
-                  onClick={() => bloomFlower(index)}
-                  aria-label={`${flower.label}: ${flower.message}`}
-                  aria-pressed={bloomedFlowers.has(index)}
-                >
-                  <span className="flower-stem" />
-                  <span className="flower-leaf flower-leaf-left" />
-                  <span className="flower-leaf flower-leaf-right" />
-                  <span className="flower-head" aria-hidden="true">
-                    {Array.from({ length: 6 }).map((_, petalIndex) => (
-                      <span key={petalIndex} className={`flower-petal petal-${petalIndex + 1}`} />
-                    ))}
-                    <span className="flower-center" />
-                  </span>
-                </button>
-              ))}
-              {allFlowersBloomed && (
-                <motion.div
-                  className="bouquet-reward"
-                  initial={{ opacity: 0, scale: 0.75 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                >
-                  <Image
-                    src={content.gifts.bouquet.imageSrc}
-                    alt={content.gifts.bouquet.imageAlt}
-                    fill
-                    sizes="280px"
-                  />
-                </motion.div>
-              )}
-            </div>
-            <p className="bloom-message" aria-live="polite">
-              {allFlowersBloomed
-                ? content.interactive.bouquet.completeMessage
-                : activeBloomMessage || "Each flower is hiding a little reason."}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {showChocolatePicker && (
-        <div
-          className="gift-modal"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setShowChocolatePicker(false)}
-        >
-          <button
-            type="button"
-            className="close-lightbox"
-            onClick={() => setShowChocolatePicker(false)}
-            aria-label="Close chocolate picker"
-          >
-            Close
-          </button>
-          <div className="picker-card" onClick={(event) => event.stopPropagation()}>
-            <h3>{content.gifts.chocolates.pickerTitle}</h3>
-            <p>{content.gifts.chocolates.pickerMessage}</p>
-            <div className="picker-options">
-              {content.gifts.chocolates.options.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  className="picker-option"
-                  onClick={() =>
-                    openGift({
-                      title: `${content.gifts.chocolates.title}: ${option.label}`,
-                      message: content.gifts.chocolates.message,
-                      imageSrc: option.imageSrc,
-                      imageAlt: option.imageAlt,
-                    })
-                  }
-                >
-                  <span className="picker-option-thumb" aria-hidden="true">
-                    <Image
-                      src={option.imageSrc}
-                      alt=""
-                      fill
-                      sizes="80px"
-                    />
-                  </span>
-                  <span className="picker-option-label">{option.label}</span>
-                  <span className="picker-option-cta" aria-hidden="true">
-                    Select
-                  </span>
-                </button>
-              ))}
             </div>
           </div>
         </div>

@@ -559,26 +559,12 @@ button:focus-visible {
 }
 
 .prompt-line {
-  min-height: 1.65rem;
+  min-height: 2rem;
   margin: 0.65rem 0 0;
   color: #7f5a95;
+  font-size: clamp(1.05rem, 2.4vw, 1.25rem);
   font-weight: 750;
-}
-
-.dodge-image-frame {
-  position: relative;
-  width: min(100%, 530px);
-  min-height: 245px;
-  margin: 0.7rem auto 0;
-  overflow: hidden;
-  border: 7px solid rgba(255, 255, 255, 0.9);
-  border-radius: 22px;
-  background: #fdf8ff;
-  box-shadow: 0 14px 32px rgba(96, 71, 126, 0.12);
-}
-
-.dodge-image-frame img {
-  object-fit: cover;
+  line-height: 1.45;
 }
 
 .button-arena {
@@ -784,10 +770,6 @@ button:focus-visible {
   transform: translateY(-3px);
   border-color: rgba(112, 82, 145, 0.24);
   box-shadow: 0 14px 28px rgba(89, 67, 113, 0.14);
-}
-
-.gift-choice.sunshine {
-  background: linear-gradient(135deg, rgba(255, 250, 231, 0.96), rgba(255, 242, 218, 0.94));
 }
 
 .gift-choice.chocolate {
@@ -1189,13 +1171,19 @@ button:focus-visible {
   position: fixed;
   inset: 0;
   z-index: 65;
-  pointer-events: none;
+  pointer-events: auto;
   background: rgba(252, 248, 255, 0.86);
   backdrop-filter: blur(8px);
   display: grid;
   place-content: center;
   padding: 1rem;
   text-align: center;
+  cursor: pointer;
+}
+
+.celebration-overlay:focus-visible {
+  outline: 4px solid rgba(116, 82, 143, 0.42);
+  outline-offset: -8px;
 }
 
 .celebration-overlay h2 {
@@ -1354,8 +1342,7 @@ button:focus-visible {
   backdrop-filter: blur(18px);
 }
 
-.interactive-card h3,
-.bouquet-card h3 {
+.interactive-card h3 {
   margin: 0.85rem 0 0;
   color: #675078;
   font-family: var(--font-dancing-script), "Brush Script MT", cursive;
@@ -1380,6 +1367,21 @@ button:focus-visible {
   width: min(510px, 90vw);
   margin-inline: auto;
   line-height: 1.6;
+}
+
+.celebration-skip {
+  position: relative;
+  z-index: 2;
+  width: fit-content;
+  margin: 0.8rem auto 0;
+  border: 1px solid rgba(107, 79, 133, 0.14);
+  border-radius: 999px;
+  padding: 0.45rem 0.75rem;
+  background: rgba(255, 255, 255, 0.68);
+  color: #806d8b;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
 }
 
 .ring-box-scene {
@@ -1606,7 +1608,7 @@ button:focus-visible {
 }
 
 .word-cloud {
-  min-height: 225px;
+  min-height: 195px;
   margin-top: 1rem;
   border: 1px dashed rgba(112, 82, 145, 0.24);
   border-radius: 24px;
@@ -1623,10 +1625,10 @@ button:focus-visible {
 .word-cloud button {
   border: 1px solid rgba(105, 75, 137, 0.14);
   border-radius: 999px;
-  padding: 0.65rem 0.9rem;
+  padding: 0.52rem 0.75rem;
   background: linear-gradient(145deg, #fff8fb, #f2edff);
   color: #6a527b;
-  font-size: 0.86rem;
+  font-size: 0.78rem;
   font-weight: 850;
   box-shadow: 0 8px 18px rgba(85, 62, 108, 0.1);
   cursor: pointer;
@@ -1792,8 +1794,9 @@ button:focus-visible {
   translate: -50% -50%;
   color: #9b7190;
   font-family: var(--font-dancing-script), cursive;
-  font-size: 0.8rem;
-  font-weight: 800;
+  font-size: clamp(1.4rem, 3.2vw, 1.8rem);
+  font-weight: 900;
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.95);
   white-space: nowrap;
   pointer-events: none;
 }
@@ -1888,196 +1891,6 @@ button:focus-visible {
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-
-/* Blooming bouquet */
-
-.bouquet-card {
-  width: min(650px, 95vw);
-  max-height: 90vh;
-  overflow: auto;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  border-radius: 28px;
-  padding: clamp(1.2rem, 4vw, 2rem);
-  background: #fffefe;
-  box-shadow: 0 28px 75px rgba(42, 29, 54, 0.26);
-  text-align: center;
-}
-
-.bouquet-card .eyebrow {
-  margin-inline: auto;
-}
-
-.bouquet-card > p:not(.eyebrow) {
-  margin: 0.55rem 0 0;
-  color: var(--muted-ink);
-}
-
-.bouquet-stage {
-  position: relative;
-  height: 330px;
-  margin-top: 1rem;
-  overflow: hidden;
-  border: 1px solid rgba(104, 77, 132, 0.13);
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at 18% 18%, rgba(255, 220, 189, 0.55), transparent 24%),
-    linear-gradient(#eef8ff 0 65%, #e3f2e9 65% 100%);
-}
-
-.bloom-button {
-  position: absolute;
-  bottom: 4px;
-  width: 82px;
-  height: 285px;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-}
-
-.bloom-1 { left: 4%; }
-.bloom-2 { left: 22%; }
-.bloom-3 { left: 40%; }
-.bloom-4 { left: 58%; }
-.bloom-5 { left: 76%; }
-
-.flower-stem {
-  position: absolute;
-  left: calc(50% - 3px);
-  bottom: 12px;
-  width: 6px;
-  height: 178px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #76a68b, #a7c9ad);
-  transform: scaleY(0.52);
-  transform-origin: bottom;
-  transition: transform 650ms cubic-bezier(0.2, 0.85, 0.25, 1.15);
-}
-
-.flower-leaf {
-  position: absolute;
-  bottom: 76px;
-  width: 27px;
-  height: 15px;
-  border-radius: 100% 0 100% 0;
-  background: #95bca1;
-  opacity: 0;
-  transition: opacity 300ms 350ms ease, transform 500ms 280ms ease;
-}
-
-.flower-leaf-left {
-  left: 15px;
-  transform: rotate(25deg) scale(0.4);
-}
-
-.flower-leaf-right {
-  right: 13px;
-  bottom: 112px;
-  transform: rotate(205deg) scale(0.4);
-}
-
-.flower-head {
-  position: absolute;
-  left: 1px;
-  top: 23px;
-  width: 80px;
-  height: 80px;
-  transform: translateY(86px) scale(0.45);
-  transition: transform 700ms cubic-bezier(0.2, 0.85, 0.25, 1.2);
-}
-
-.flower-petal,
-.flower-center {
-  position: absolute;
-  left: 26px;
-  top: 22px;
-}
-
-.flower-petal {
-  width: 28px;
-  height: 38px;
-  border-radius: 70% 70% 55% 55%;
-  background: #efadc5;
-  transform-origin: 14px 18px;
-  opacity: 0.35;
-  transition: transform 550ms calc(80ms * var(--flower-index)) cubic-bezier(0.2, 0.8, 0.25, 1.2), opacity 350ms ease;
-}
-
-.bloom-2 .flower-petal { background: #c6afe9; }
-.bloom-3 .flower-petal { background: #f3cf73; }
-.bloom-4 .flower-petal { background: #9fcde7; }
-.bloom-5 .flower-petal { background: #ef8fb3; }
-
-.petal-1 { transform: rotate(0deg) translateY(-17px) scale(0.25); }
-.petal-2 { transform: rotate(60deg) translateY(-17px) scale(0.25); }
-.petal-3 { transform: rotate(120deg) translateY(-17px) scale(0.25); }
-.petal-4 { transform: rotate(180deg) translateY(-17px) scale(0.25); }
-.petal-5 { transform: rotate(240deg) translateY(-17px) scale(0.25); }
-.petal-6 { transform: rotate(300deg) translateY(-17px) scale(0.25); }
-
-.flower-center {
-  z-index: 2;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #f5d784;
-  box-shadow: inset 0 0 0 5px rgba(255, 255, 255, 0.3);
-}
-
-.bloom-button.is-bloomed .flower-stem {
-  transform: scaleY(1);
-}
-
-.bloom-button.is-bloomed .flower-head {
-  transform: translateY(0) scale(1);
-}
-
-.bloom-button.is-bloomed .flower-leaf {
-  opacity: 1;
-}
-
-.bloom-button.is-bloomed .flower-leaf-left {
-  transform: rotate(25deg) scale(1);
-}
-
-.bloom-button.is-bloomed .flower-leaf-right {
-  transform: rotate(205deg) scale(1);
-}
-
-.bloom-button.is-bloomed .flower-petal {
-  opacity: 1;
-}
-
-.bloom-button.is-bloomed .petal-1 { transform: rotate(0deg) translateY(-17px) scale(1); }
-.bloom-button.is-bloomed .petal-2 { transform: rotate(60deg) translateY(-17px) scale(1); }
-.bloom-button.is-bloomed .petal-3 { transform: rotate(120deg) translateY(-17px) scale(1); }
-.bloom-button.is-bloomed .petal-4 { transform: rotate(180deg) translateY(-17px) scale(1); }
-.bloom-button.is-bloomed .petal-5 { transform: rotate(240deg) translateY(-17px) scale(1); }
-.bloom-button.is-bloomed .petal-6 { transform: rotate(300deg) translateY(-17px) scale(1); }
-
-.bouquet-reward {
-  position: absolute;
-  z-index: 5;
-  left: calc(50% - 115px);
-  bottom: 0;
-  width: 230px;
-  height: 260px;
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.74);
-  box-shadow: 0 20px 44px rgba(77, 54, 98, 0.16);
-  backdrop-filter: blur(6px);
-}
-
-.bouquet-reward img {
-  object-fit: contain;
-}
-
-.bloom-message {
-  min-height: 3rem;
-  color: #6a527a !important;
-  font-family: var(--font-dancing-script), cursive;
-  font-size: 1.3rem;
-  font-weight: 700;
 }
 
 /* Animated cassette voice note */
@@ -2465,34 +2278,6 @@ button:focus-visible {
 
   .timeline-controls button {
     justify-self: stretch;
-  }
-
-  .bouquet-stage {
-    height: 295px;
-  }
-
-  .bloom-button {
-    width: 64px;
-    height: 260px;
-  }
-
-  .bloom-1 { left: 0; }
-  .bloom-2 { left: 19%; }
-  .bloom-3 { left: 38%; }
-  .bloom-4 { left: 57%; }
-  .bloom-5 { left: 76%; }
-
-  .flower-head {
-    left: -8px;
-  }
-
-  .flower-leaf-left { left: 8px; }
-  .flower-leaf-right { right: 5px; }
-
-  .bouquet-reward {
-    left: calc(50% - 100px);
-    width: 200px;
-    height: 225px;
   }
 
   .hidden-note {
