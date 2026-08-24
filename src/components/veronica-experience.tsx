@@ -226,6 +226,7 @@ export default function VeronicaExperience({
   const noTrailIdRef = useRef(0);
   const heartHoldTimerRef = useRef<number | null>(null);
   const celebrationTimerRef = useRef<number | null>(null);
+  const celebrationShownAtRef = useRef(0);
   const audioContextRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
 
@@ -476,7 +477,18 @@ export default function VeronicaExperience({
     });
   }, []);
 
+  const skipCelebration = useCallback(
+    (behavior: ScrollBehavior = "auto") => {
+      if (performance.now() - celebrationShownAtRef.current < 500) {
+        return;
+      }
+      finishCelebration(behavior);
+    },
+    [finishCelebration],
+  );
+
   const onYes = useCallback(() => {
+    celebrationShownAtRef.current = performance.now();
     setAnswer("yes");
     setIsEnvelopeOpen(false);
     setShowCelebration(true);
@@ -833,11 +845,11 @@ export default function VeronicaExperience({
           role="button"
           tabIndex={0}
           aria-label="Continue to the next part"
-          onClick={() => finishCelebration("auto")}
+          onClick={() => skipCelebration("auto")}
           onKeyDown={(event) => {
             if (event.key !== "Enter" && event.key !== " ") return;
             event.preventDefault();
-            finishCelebration("auto");
+            skipCelebration("auto");
           }}
         >
           <div className="ring-box-scene" aria-hidden="true">
