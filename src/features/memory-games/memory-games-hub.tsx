@@ -9,7 +9,7 @@ import type { GameId } from "./types";
 import styles from "./memory-games.module.css";
 
 const cards: Array<{ id: GameId; href: string; icon: string; title: string; description: string }> = [
-  { id: "lost-little-girl", href: "/games/lost-little-girl", icon: "⌖", title: "Find the Lost Little Girl", description: "Replay the cinema rescue and find Mahal before the movie starts." },
+  { id: "lost-little-girl", href: "/games/lost-little-girl", icon: "M/8", title: "Mall After Dark", description: "Search four floors, ride the escalators, and find Mahal waiting outside the cinema." },
   { id: "date-detective", href: "/games/date-detective", icon: "✦", title: "Date Detective", description: "Put the dates, messages, and milestones of Kilig & Co. back together." },
   { id: "memory-crossword", href: "/games/memory-crossword", icon: "A♡", title: "Memory Crossword", description: "Solve the words and places that became part of our shared language." },
 ];
