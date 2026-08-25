@@ -290,9 +290,6 @@ export default function VeronicaExperience({
     };
   }, [allowQueryOverrides, locationSearch, recipient]);
   const themeClass = `theme-${recipient?.themeAccent ?? content.theme.accent}`;
-  const letterTitle = recipient?.letterTitle ?? content.letter.title;
-  const letterParagraphs = recipient?.customNote ?? content.letter.paragraphs;
-  const letterSignOff = recipient?.letterSignOff ?? content.letter.signOff;
   const recipientGallery = recipient?.gallery?.length ? recipient.gallery : content.gallery;
   const recipientTimeline = recipient?.timeline?.length ? recipient.timeline : content.timeline;
   const voiceNoteSrc = recipient?.voiceNoteSrc ?? content.gifts.voiceNote.src;
@@ -982,16 +979,12 @@ export default function VeronicaExperience({
                   <span className="envelope-paper" />
                   <span className="envelope-heart">✿</span>
                   <span className="envelope-text">Tap to open your little note</span>
+                  <span className="in-progress-badge letter-progress">{content.letter.status}</span>
                 </motion.button>
               ) : (
-                <>
-                  <p className="eyebrow">A note from Mahal</p>
-                  <h3>{letterTitle}</h3>
-                  {letterParagraphs.map((paragraph) => (
-                    <p key={paragraph}>{resolveText(paragraph)}</p>
-                  ))}
-                  <p className="signoff">{resolveText(letterSignOff)}</p>
-                </>
+                <div className="letter-in-progress-panel" aria-label="Letter content in progress">
+                  <span className="in-progress-badge">{content.letter.status}</span>
+                </div>
               )}
 
               <div className="gift-shelf">
@@ -1141,8 +1134,8 @@ export default function VeronicaExperience({
                     aria-expanded={openedPromises.has(index)}
                   >
                     <span className="promise-flap" aria-hidden="true" />
+                    <span className="in-progress-badge promise-progress">{content.interactive.promises.status}</span>
                     <strong>{promise.label}</strong>
-                    <span className="promise-message">{promise.message}</span>
                   </button>
                 ))}
               </div>

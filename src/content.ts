@@ -51,7 +51,7 @@ export const content = {
     eyebrow: "One important question",
     text: "WILL YOU MARRY ME?",
     tease: "I dare you to try to click No -.- You better not.",
-    yesText: "Yes <3",
+    yesText: "YES",
     noText: "No 🙈",
   },
   prompts: {
@@ -60,9 +60,9 @@ export const content = {
       "That button is only here for decoration.",
       "Mahal programmed the correct answer already.",
       "Nope, it has somewhere else to be!",
-      "The Always button looks much friendlier.",
+      "The Yes button looks much friendlier.",
       "Okay, this is getting suspicious...",
-      "Just press Always, baby 😭",
+      "Just press Yes, baby 😭",
     ],
     yesCelebrationTitle: "Correct answer! ✨",
     yesCelebrationMsg: "You will always be my favorite person.",
@@ -90,13 +90,10 @@ export const content = {
     },
   ] satisfies GalleryItem[],
   letter: {
-    title: "To my beloved Mahal,",
-    paragraphs: [
-      "There is no holiday or special date behind this. I simply wanted to make something that reminds you how much happiness you bring into my life.",
-      "You have a way of making ordinary days brighter, conversations warmer, and every little moment feel worth remembering.",
-      "Thank you for being the best part of my days. I hope this tiny place makes you smile whenever you need it.",
-    ],
-    signOff: "With all my love, {from}",
+    status: "IN PROGRESS",
+    title: "",
+    paragraphs: [],
+    signOff: "",
   },
   reasons: [
     { title: "Your smile", body: "It can turn the most ordinary moment into my favorite one." },
@@ -170,22 +167,23 @@ export const content = {
       eyebrow: "A pocket full of promises",
       title: "Open whenever you need one",
       instruction: "Each little envelope is yours to keep.",
+      status: "IN PROGRESS",
       items: [
         {
           label: "Open when you miss me",
-          message: "Close your eyes and remember that I am missing you too—and loving you from wherever I am.",
+          message: "",
         },
         {
           label: "Open when you feel sad",
-          message: "You never have to carry a heavy day alone. I am always on your side.",
+          message: "",
         },
         {
           label: "Open when you need reassurance",
-          message: "I choose you clearly, completely, and again every day. You are safe in my love.",
+          message: "",
         },
         {
           label: "Open when you cannot sleep",
-          message: "Imagine me holding you close and reminding you that tomorrow is another day we get to share.",
+          message: "",
         },
       ],
     },
