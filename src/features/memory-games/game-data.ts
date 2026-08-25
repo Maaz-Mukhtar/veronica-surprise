@@ -6,7 +6,7 @@ export const memoryGamesConfig: RelationshipGamesConfig = {
   title: "Our Memory Games",
   intro: "Three little adventures through the moments, places, and words that became us.",
   finalReward: {
-    title: "Case solved. Puzzle complete. Lost girl found.",
+    title: "Case solved. Puzzle complete. Cinema found.",
     message: "Welcome home, Wifey. 💕",
   },
   dateDetective: {
@@ -119,8 +119,8 @@ export const memoryGamesConfig: RelationshipGamesConfig = {
     ],
   },
   lostLittleGirl: {
-    title: "Find the Lost Little Girl",
-    intro: "The night Mahal and Princess finally found each other.",
+    title: "Mall After Dark",
+    intro: "Search every floor and find Mahal waiting outside the cinema.",
     rows: 8,
     cols: 12,
     start: { row: 6, col: 0 },

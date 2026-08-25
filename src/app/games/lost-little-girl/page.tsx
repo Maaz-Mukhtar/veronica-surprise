@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import { GamePageShell } from "@/features/memory-games/game-shell";
-import { LostLittleGirlGame } from "@/features/memory-games/lost-little-girl-game";
+import { CinemaMallGame } from "@/features/memory-games/cinema-mall-game";
 
-export const metadata: Metadata = { title: "Find the Lost Little Girl — Kilig & Co." };
+export const metadata: Metadata = {
+  title: "Mall After Dark — Find Mahal",
+  description: "Search four floors and find Mahal waiting outside the cinema.",
+};
 
 export default function LostLittleGirlPage() {
-  return <GamePageShell><LostLittleGirlGame /></GamePageShell>;
+  return <CinemaMallGame />;
 }
